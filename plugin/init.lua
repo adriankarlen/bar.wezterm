@@ -12,6 +12,12 @@ local config = {
   hostname_icon = "󰒋",
   clock_icon = "󰃰",
   cwd_icon = "",
+  enabled_modules = {
+    username = true,
+    hostname = true,
+    clock = true,
+    cwd = true,
+  },
 }
 
 local M = {}
@@ -187,38 +193,41 @@ wez.on("update-right-status", function(window, pane)
   if not present then
     return
   end
-
   local palette = conf.resolved_palette
-  local username = io.popen("whoami"):read("*a"):gsub("\n", "")
 
-  local time = wez.time.now():format "%H:%M"
+  local cells = {}
+  local enabled_modules = config.enabled_modules
+
+  if enabled_modules.username then
+    table.insert(cells, { Foreground = { Color = palette.ansi[6] } })
+    table.insert(cells, { Text = io.popen("whoami"):read("*a"):gsub("\n", "") })
+    table.insert(cells, { Foreground = { Color = palette.tab_bar.inactive_tab.fg_color } })
+    table.insert(cells, { Text = config.right_separator .. config.user_icon .. config.field_separator })
+  end
+
   local cwd, hostname = get_cwd_hostname(pane, true)
+  if enabled_modules.hostname then
+    table.insert(cells, { Foreground = { Color = palette.ansi[8] } })
+    table.insert(cells, { Text = hostname })
+    table.insert(cells, { Foreground = { Color = palette.tab_bar.inactive_tab.fg_color } })
+    table.insert(cells, { Text = config.right_separator .. config.hostname_icon .. config.field_separator })
+  end
 
-  window:set_right_status(wez.format {
-    { Foreground = { Color = palette.ansi[6] } },
-    { Text = username },
+  if enabled_modules.clock then
+    table.insert(cells, { Foreground = { Color = palette.ansi[5] } })
+    table.insert(cells, { Text = wez.time.now():format "%H:%M" })
+    table.insert(cells, { Foreground = { Color = palette.tab_bar.inactive_tab.fg_color } })
+    table.insert(cells, { Text = config.right_separator .. config.clock_icon .. "  " })
+  end
 
-    { Foreground = { Color = palette.tab_bar.inactive_tab.fg_color } },
-    { Text = config.right_separator .. config.user_icon .. config.field_separator },
+  if enabled_modules.cwd then
+    table.insert(cells, { Foreground = { Color = palette.tab_bar.inactive_tab.fg_color } })
+    table.insert(cells, { Text = config.cwd_icon .. " " })
+    table.insert(cells, { Foreground = { Color = palette.ansi[7] } })
+    table.insert(cells, { Text = cwd .. " " })
+  end
 
-    { Foreground = { Color = palette.ansi[8] } },
-    { Text = hostname },
-
-    { Foreground = { Color = palette.tab_bar.inactive_tab.fg_color } },
-    { Text = config.right_separator .. config.hostname_icon .. config.field_separator },
-
-    { Foreground = { Color = palette.ansi[5] } },
-    { Text = time },
-
-    { Foreground = { Color = palette.tab_bar.inactive_tab.fg_color } },
-    { Text = config.right_separator .. config.clock_icon .. "  " },
-
-    { Foreground = { Color = palette.tab_bar.inactive_tab.fg_color } },
-    { Text = config.cwd_icon .. " " },
-
-    { Foreground = { Color = palette.ansi[7] } },
-    { Text = cwd .. " " },
-  })
+  window:set_right_status(wez.format(cells))
 end)
 
 return M
