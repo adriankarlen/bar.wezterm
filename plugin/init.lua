@@ -1,5 +1,5 @@
 local wezterm = require "wezterm"
-local fun = require "utils.fun"
+local utils = require "utils"
 
 local config = {
   position = "bottom",
@@ -93,7 +93,7 @@ wezterm.on("update-status", function(window, pane)
     pane_title = tty
   end
 
-  local conf = fun.get_conf(window)
+  local conf = utils.get_conf(window)
   ---@diagnostic disable-next-line: need-check-nil
   local palette = conf.resolved_palette
   local stat_fg = palette.tab_bar.active_tab.fg_color
@@ -113,13 +113,13 @@ wezterm.on("update-status", function(window, pane)
 end)
 
 wezterm.on("update-right-status", function(window, pane)
-  local conf = fun.get_conf(window)
+  local conf = utils.get_conf(window)
   ---@diagnostic disable-next-line: need-check-nil
   local palette = conf.resolved_palette
   local username = io.popen("whoami"):read("*a"):gsub("\n", "")
 
   local time = wezterm.time.now():format "%H:%M"
-  local cwd, hostname = fun.get_cwd_hostname(pane, true)
+  local cwd, hostname = utils.get_cwd_hostname(pane, true)
 
   window:set_right_status(wezterm.format {
     { Foreground = { Color = palette.ansi[6] } },
