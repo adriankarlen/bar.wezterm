@@ -1,5 +1,5 @@
 local M = {}
-local wez = require("wezterm")
+local wez = require "wezterm"
 
 M.get_conf = function(window)
   local present, conf = pcall(window.effective_config, window)
@@ -11,10 +11,7 @@ end
 
 ---User home directory
 ---@return string home path to the suer home directory.
-M.home = (os.getenv("USERPROFILE") or os.getenv("HOME") or wez.home_dir or ""):gsub(
-  "\\",
-  "/"
-)
+M.home = (os.getenv "USERPROFILE" or os.getenv "HOME" or wez.home_dir or ""):gsub("\\", "/")
 
 M.is_windows = package.config:sub(1, 1) == "\\"
 
@@ -33,12 +30,12 @@ M.find_git_dir = function(directory)
     local handle = io.open(directory .. "/.git/HEAD", "r")
     if handle then
       handle:close()
-      directory = directory:match("([^/]+)$")
+      directory = directory:match "([^/]+)$"
       return directory
     elseif directory == "/" or directory == "" then
       break
     else
-      directory = directory:match("(.+)/[^/]*")
+      directory = directory:match "(.+)/[^/]*"
     end
   end
 
@@ -60,7 +57,7 @@ M.get_cwd_hostname = function(pane, search_git_root_instead)
       -- an older version of wezterm, 20230712-072601-f4abf8fd or earlier,
       -- which doesn't have the Url object
       cwd_uri = cwd_uri:sub(8)
-      local slash = cwd_uri:find("/")
+      local slash = cwd_uri:find "/"
       if slash then
         hostname = cwd_uri:sub(1, slash - 1)
         -- and extract the cwd from the uri, decoding %-encoding
@@ -71,7 +68,7 @@ M.get_cwd_hostname = function(pane, search_git_root_instead)
     end
 
     -- Remove the domain name portion of the hostname
-    local dot = hostname:find("[.]")
+    local dot = hostname:find "[.]"
     if dot then
       hostname = hostname:sub(1, dot - 1)
     end
