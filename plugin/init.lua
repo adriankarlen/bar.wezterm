@@ -42,10 +42,6 @@ local function tableMerge(t1, t2)
   return t1
 end
 
-local get_conf = function(window)
-  return conf
-end
-
 local home = (os.getenv "USERPROFILE" or os.getenv "HOME" or wez.home_dir or ""):gsub("\\", "/")
 
 local is_windows = package.config:sub(1, 1) == "\\"
