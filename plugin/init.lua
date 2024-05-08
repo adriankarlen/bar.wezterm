@@ -1,5 +1,4 @@
-local wezterm = require "wezterm"
-local utils = require "utils"
+local wez = require "wezterm"
 
 local config = {
   position = "bottom",
@@ -43,6 +42,84 @@ local function tableMerge(t1, t2)
   return t1
 end
 
+local get_conf = function(window)
+  return conf
+end
+
+local home = (os.getenv "USERPROFILE" or os.getenv "HOME" or wez.home_dir or ""):gsub("\\", "/")
+
+local is_windows = package.config:sub(1, 1) == "\\"
+
+local find_git_dir = function(directory)
+  directory = directory:gsub("~", home)
+
+  while directory do
+    local handle = io.open(directory .. "/.git/HEAD", "r")
+    if handle then
+      handle:close()
+      directory = directory:match "([^/]+)$"
+      return directory
+    elseif directory == "/" or directory == "" then
+      break
+    else
+      directory = directory:match "(.+)/[^/]*"
+    end
+  end
+
+  return nil
+end
+
+local get_cwd_hostname = function(pane, search_git_root_instead)
+  local cwd, hostname = "", ""
+  local cwd_uri = pane:get_current_working_dir()
+  if cwd_uri then
+    if type(cwd_uri) == "userdata" then
+      -- Running on a newer version of wezterm and we have
+      -- a URL object here, making this simple!
+
+      ---@diagnostic disable-next-line: undefined-field
+      cwd = cwd_uri.file_path
+      ---@diagnostic disable-next-line: undefined-field
+      hostname = cwd_uri.host or wez.hostname()
+    else
+      -- an older version of wezterm, 20230712-072601-f4abf8fd or earlier,
+      -- which doesn't have the Url object
+      cwd_uri = cwd_uri:sub(8)
+      local slash = cwd_uri:find "/"
+      if slash then
+        hostname = cwd_uri:sub(1, slash - 1)
+        -- and extract the cwd from the uri, decoding %-encoding
+        cwd = cwd_uri:sub(slash):gsub("%%(%x%x)", function(hex)
+          return string.char(tonumber(hex, 16))
+        end)
+      end
+    end
+
+    -- Remove the domain name portion of the hostname
+    local dot = hostname:find "[.]"
+    if dot then
+      hostname = hostname:sub(1, dot - 1)
+    end
+    if hostname == "" then
+      hostname = wez.hostname()
+    end
+
+    if is_windows then
+      cwd = cwd:gsub("/" .. home .. "(.-)$", "~%1")
+    else
+      cwd = cwd:gsub(home .. "(.-)$", "~%1")
+    end
+
+    ---search for the git root of the project if specified
+    if search_git_root_instead then
+      local git_root = find_git_dir(cwd)
+      cwd = git_root or cwd ---fallback to cwd
+    end
+  end
+
+  return cwd, hostname
+end
+
 -- conforming to https://github.com/wez/wezterm/commit/e4ae8a844d8feaa43e1de34c5cc8b4f07ce525dd
 -- exporting an apply_to_config function, even though we don't change the users config
 M.apply_to_config = function(c, opts)
@@ -59,7 +136,7 @@ M.apply_to_config = function(c, opts)
   c.tab_max_width = config.max_width
 end
 
-wezterm.on("format-tab-title", function(tab, _, _, conf, _, max_width)
+wez.on("format-tab-title", function(tab, _, _, conf, _, max_width)
   local palette = conf.resolved_palette
   local index = tab.tab_index + 1
   local title = ""
@@ -84,7 +161,7 @@ wezterm.on("format-tab-title", function(tab, _, _, conf, _, max_width)
 end)
 
 -- Name of workspace
-wezterm.on("update-status", function(window, pane)
+wez.on("update-status", function(window, pane)
   -- Workspace name
   local stat = " " .. config.workspace_icon .. " " .. window:active_workspace() .. " "
   local pane_title = pane:get_title()
@@ -93,8 +170,11 @@ wezterm.on("update-status", function(window, pane)
     pane_title = tty
   end
 
-  local conf = utils.get_conf(window)
-  ---@diagnostic disable-next-line: need-check-nil
+  local present, conf = pcall(window.effective_config, window)
+  if not present then
+    return
+  end
+
   local palette = conf.resolved_palette
   local stat_fg = palette.tab_bar.active_tab.fg_color
 
@@ -103,7 +183,7 @@ wezterm.on("update-status", function(window, pane)
     stat = " leader "
   end
 
-  window:set_left_status(wezterm.format {
+  window:set_left_status(wez.format {
     { Foreground = { Color = stat_fg } },
     { Text = stat },
 
@@ -112,16 +192,19 @@ wezterm.on("update-status", function(window, pane)
   })
 end)
 
-wezterm.on("update-right-status", function(window, pane)
-  local conf = utils.get_conf(window)
-  ---@diagnostic disable-next-line: need-check-nil
+wez.on("update-right-status", function(window, pane)
+  local present, conf = pcall(window.effective_config, window)
+  if not present then
+    return
+  end
+
   local palette = conf.resolved_palette
   local username = io.popen("whoami"):read("*a"):gsub("\n", "")
 
-  local time = wezterm.time.now():format "%H:%M"
-  local cwd, hostname = utils.get_cwd_hostname(pane, true)
+  local time = wez.time.now():format "%H:%M"
+  local cwd, hostname = get_cwd_hostname(pane, true)
 
-  window:set_right_status(wezterm.format {
+  window:set_right_status(wez.format {
     { Foreground = { Color = palette.ansi[6] } },
     { Text = username },
 
