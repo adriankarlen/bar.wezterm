@@ -135,12 +135,11 @@ end
 wez.on("format-tab-title", function(tab, _, _, conf, _, _)
   local palette = conf.resolved_palette
   local index = tab.tab_index + 1
-  local title = ""
+  local title = index .. config.left_separator .. tab_title(tab) .. "  "
+  local fg = palette.ansi[6]
 
   if tab.is_active then
-    title = index .. config.left_separator .. tab_title(tab) .. "  "
-  else
-    title = index .. " "
+    fg = palette.ansi[4]
   end
 
   local fillerwidth = 4 + index
@@ -151,7 +150,7 @@ wez.on("format-tab-title", function(tab, _, _, conf, _, _)
 
   return {
     { Background = { Color = palette.background } },
-    { Foreground = { Color = palette.ansi[4] } },
+    { Foreground = { Color = fg } },
     { Text = title },
   }
 end)
