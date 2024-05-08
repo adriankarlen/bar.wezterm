@@ -157,20 +157,15 @@ end)
 
 -- Name of workspace
 wez.on("update-status", function(window, pane)
-  -- Workspace name
-  local stat = " " .. config.workspace_icon .. " " .. window:active_workspace() .. " "
-  local pane_title = pane:get_title()
-  local tty = pane:get_tty_name()
-  if tty then
-    pane_title = tty
-  end
-
   local present, conf = pcall(window.effective_config, window)
   if not present then
     return
   end
 
   local palette = conf.resolved_palette
+
+  -- Workspace name
+  local stat = " " .. config.workspace_icon .. " " .. window:active_workspace() .. " "
   local stat_fg = palette.tab_bar.active_tab.fg_color
 
   if window:leader_is_active() then
@@ -183,7 +178,7 @@ wez.on("update-status", function(window, pane)
     { Text = stat },
 
     { Foreground = { Color = palette.ansi[7] } },
-    { Text = config.pane_icon .. " " .. pane_title .. " " },
+    { Text = config.pane_icon .. " " .. pane:get_title() .. " " },
   })
 end)
 
