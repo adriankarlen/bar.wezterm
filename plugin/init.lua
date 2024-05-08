@@ -132,7 +132,7 @@ M.apply_to_config = function(c, opts)
   c.tab_max_width = config.max_width
 end
 
-wez.on("format-tab-title", function(tab, _, _, conf, _, max_width)
+wez.on("format-tab-title", function(tab, _, _, conf, _, _)
   local palette = conf.resolved_palette
   local index = tab.tab_index + 1
   local title = ""
@@ -143,10 +143,10 @@ wez.on("format-tab-title", function(tab, _, _, conf, _, max_width)
     title = index .. " "
   end
 
-  if #title > max_width then
-    print("title too long", #title, max_width)
-    local diff = #title - max_width
-    title = title:sub(1, #title - diff - 3) .. "..."
+  local fillerwidth = 4 + index
+  local width = conf.tab_max_width - fillerwidth - 1
+  if (#title + fillerwidth) > conf.tab_max_width then
+    title = wez.truncate_right(title, width) .. "…"
   end
 
   return {
