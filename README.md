@@ -23,6 +23,34 @@ bar.apply_to_config(config)
 
 &nbsp;
 
+## 🛠️ Configuration
+
+The `apply_to_config`-function takes a second param `opts`.
+
+### 🏭 Default configuration
+
+```lua
+{
+  position = "bottom",
+  max_width = 32,
+  left_separator = " -> ",
+  right_separator = " <- ",
+  field_separator = "  |  ",
+  workspace_icon = "",
+  pane_icon = "",
+  user_icon = "",
+  hostname_icon = "󰒋",
+  clock_icon = "󰃰",
+  cwd_icon = "",
+  enabled_modules = {
+    username = true,
+    hostname = true,
+    clock = true,
+    cwd = true,
+  },
+}
+```
+
 ## 📜 License
 
 This project is licensed under the MIT License - see the
