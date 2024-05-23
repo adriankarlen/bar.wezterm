@@ -2,7 +2,6 @@
 
 A tab bar configuration for wezterm, this configuration is heavily inspired by [rose-pine/tmux](https://github.com/rose-pine/tmux)
 
-> NOTE: This bar requires that you are using a Nerd Font or has "Symbols Nerd Font" installed on your system so wezterm can default to it
 
 ## 📷
 
@@ -28,6 +27,8 @@ bar.apply_to_config(config)
 The `apply_to_config`-function takes a second param `opts`.
 
 ### 🏭 Default configuration
+
+> NOTE: The default config requires that you are using a Nerd Font or has "Symbols Nerd Font" installed on your system so wezterm can default to it.
 
 ```lua
 {
