@@ -133,6 +133,14 @@ M.apply_to_config = function(c, opts)
   -- combine user config with defaults
   config = tableMerge(config, opts)
 
+  if c.colors == nil then
+    local scheme = wez.color.get_builtin_schemes()[c.color_scheme]
+    c.colors = {
+      tab_bar = {
+        background = scheme.background,
+      },
+    }
+  end
   c.use_fancy_tab_bar = false
   c.tab_bar_at_bottom = config.position == "bottom"
   c.tab_max_width = config.max_width
@@ -155,7 +163,7 @@ wez.on("format-tab-title", function(tab, _, _, conf, _, _)
   end
 
   return {
-    { Background = { Color = palette.background } },
+    { Background = { Color = palette.tab_bar.background } },
     { Foreground = { Color = fg } },
     { Text = title },
   }
@@ -172,7 +180,7 @@ wez.on("update-status", function(window, pane)
 
   -- Workspace name
   local stat = " " .. config.workspace_icon .. " " .. window:active_workspace() .. " "
-  local stat_fg = palette.tab_bar.active_tab.fg_color
+  local stat_fg = palette.foreground
 
   if window:leader_is_active() then
     stat_fg = palette.ansi[2]
@@ -180,7 +188,7 @@ wez.on("update-status", function(window, pane)
   end
 
   window:set_left_status(wez.format {
-    { Background = { Color = palette.background } },
+    { Background = { Color = palette.tab_bar.background } },
     { Foreground = { Color = stat_fg } },
     { Text = stat },
 
@@ -197,14 +205,14 @@ wez.on("update-right-status", function(window, pane)
   local palette = conf.resolved_palette
 
   local cells = {
-    { Background = { Color = palette.background } },
+    { Background = { Color = palette.tab_bar.background } },
   }
   local enabled_modules = config.enabled_modules
 
   if enabled_modules.username then
     table.insert(cells, { Foreground = { Color = palette.ansi[6] } })
     table.insert(cells, { Text = io.popen("whoami"):read("*a"):gsub("\n", "") })
-    table.insert(cells, { Foreground = { Color = palette.tab_bar.inactive_tab.fg_color } })
+    table.insert(cells, { Foreground = { Color = palette.brights[1] } })
     table.insert(cells, { Text = config.right_separator .. config.user_icon .. config.field_separator })
   end
 
@@ -212,19 +220,19 @@ wez.on("update-right-status", function(window, pane)
   if enabled_modules.hostname then
     table.insert(cells, { Foreground = { Color = palette.ansi[8] } })
     table.insert(cells, { Text = hostname })
-    table.insert(cells, { Foreground = { Color = palette.tab_bar.inactive_tab.fg_color } })
+    table.insert(cells, { Foreground = { Color = palette.brights[1] } })
     table.insert(cells, { Text = config.right_separator .. config.hostname_icon .. config.field_separator })
   end
 
   if enabled_modules.clock then
     table.insert(cells, { Foreground = { Color = palette.ansi[5] } })
     table.insert(cells, { Text = wez.time.now():format "%H:%M" })
-    table.insert(cells, { Foreground = { Color = palette.tab_bar.inactive_tab.fg_color } })
+    table.insert(cells, { Foreground = { Color = palette.brights[1] } })
     table.insert(cells, { Text = config.right_separator .. config.clock_icon .. "  " })
   end
 
   if enabled_modules.cwd then
-    table.insert(cells, { Foreground = { Color = palette.tab_bar.inactive_tab.fg_color } })
+    table.insert(cells, { Foreground = { Color = palette.brights[1] } })
     table.insert(cells, { Text = config.cwd_icon .. " " })
     table.insert(cells, { Foreground = { Color = palette.ansi[7] } })
     table.insert(cells, { Text = cwd .. " " })

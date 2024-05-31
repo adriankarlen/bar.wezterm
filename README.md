@@ -2,16 +2,18 @@
 
 A tab bar configuration for wezterm, this configuration is heavily inspired by [rose-pine/tmux](https://github.com/rose-pine/tmux)
 
-
 ## 📷
 
-![image](https://raw.githubusercontent.com/adriankarlen/bar.wezterm/main/misc/preview.png)
+### Rosé Pine
+![image](https://raw.githubusercontent.com/adriankarlen/bar.wezterm/main/misc/rose-pine.png)
 
+### Catppuccin Mocha
+![image](https://raw.githubusercontent.com/adriankarlen/bar.wezterm/main/misc/catppuccin-mocha.png)
 &nbsp;
 
 ## 🚀 Installation
 
-This is a wezterm [plugin](https://github.com/wez/wezterm/commit/e4ae8a844d8feaa43e1de34c5cc8b4f07ce525dd). It can be installed by importing the repo and calling the apply_to_config-function.
+This is a wezterm [plugin](https://github.com/wez/wezterm/commit/e4ae8a844d8feaa43e1de34c5cc8b4f07ce525dd). It can be installed by importing the repo and calling the apply_to_config-function. It is important that the `apply_to_config`-function is called after `color_scheme` has been set.
 
 ```lua
 local bar = wezterm.plugin.require("https://github.com/adriankarlen/bar.wezterm")
