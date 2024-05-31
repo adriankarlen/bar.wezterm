@@ -180,6 +180,7 @@ wez.on("update-status", function(window, pane)
   end
 
   window:set_left_status(wez.format {
+    { Background = { Color = palette.background } },
     { Foreground = { Color = stat_fg } },
     { Text = stat },
 
@@ -195,7 +196,9 @@ wez.on("update-right-status", function(window, pane)
   end
   local palette = conf.resolved_palette
 
-  local cells = {}
+  local cells = {
+    { Background = { Color = palette.background } },
+  }
   local enabled_modules = config.enabled_modules
 
   if enabled_modules.username then
