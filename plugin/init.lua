@@ -20,6 +20,10 @@ local config = {
   },
 }
 
+local username = io.popen("whoami"):read("*a"):gsub("\n", "")
+local home = (os.getenv "USERPROFILE" or os.getenv "HOME" or wez.home_dir or ""):gsub("\\", "/")
+local is_windows = package.config:sub(1, 1) == "\\"
+
 local M = {}
 
 local function tab_title(tab_info)
@@ -47,10 +51,6 @@ local function tableMerge(t1, t2)
   end
   return t1
 end
-
-local home = (os.getenv "USERPROFILE" or os.getenv "HOME" or wez.home_dir or ""):gsub("\\", "/")
-
-local is_windows = package.config:sub(1, 1) == "\\"
 
 local find_git_dir = function(directory)
   directory = directory:gsub("~", home)
@@ -144,6 +144,8 @@ M.apply_to_config = function(c, opts)
   c.use_fancy_tab_bar = false
   c.tab_bar_at_bottom = config.position == "bottom"
   c.tab_max_width = config.max_width
+
+  -- get user name and store to GLOBAL
 end
 
 wez.on("format-tab-title", function(tab, _, _, conf, _, _)
@@ -176,9 +178,11 @@ wez.on("update-status", function(window, pane)
     return
   end
 
+  wez.log_info(pane:get_foreground_process_name())
+
   local palette = conf.resolved_palette
 
-  -- Workspace name
+  -- left status
   local stat = " " .. config.workspace_icon .. " " .. window:active_workspace() .. " "
   local stat_fg = palette.foreground
 
@@ -195,15 +199,8 @@ wez.on("update-status", function(window, pane)
     { Foreground = { Color = palette.ansi[7] } },
     { Text = config.pane_icon .. " " .. pane:get_title() .. " " },
   })
-end)
 
-wez.on("update-right-status", function(window, pane)
-  local present, conf = pcall(window.effective_config, window)
-  if not present then
-    return
-  end
-  local palette = conf.resolved_palette
-
+  -- right status
   local cells = {
     { Background = { Color = palette.tab_bar.background } },
   }
@@ -211,7 +208,7 @@ wez.on("update-right-status", function(window, pane)
 
   if enabled_modules.username then
     table.insert(cells, { Foreground = { Color = palette.ansi[6] } })
-    table.insert(cells, { Text = io.popen("whoami"):read("*a"):gsub("\n", "") })
+    table.insert(cells, { Text = username })
     table.insert(cells, { Foreground = { Color = palette.brights[1] } })
     table.insert(cells, { Text = config.right_separator .. config.user_icon .. config.field_separator })
   end
