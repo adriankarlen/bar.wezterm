@@ -20,7 +20,7 @@ local config = {
   },
 }
 
-local username = io.popen("whoami"):read("*a"):gsub("\n", "")
+local username = os.getenv('USER') or os.getenv('LOGNAME') or os.getenv('USERNAME')
 local home = (os.getenv "USERPROFILE" or os.getenv "HOME" or wez.home_dir or ""):gsub("\\", "/")
 local is_windows = package.config:sub(1, 1) == "\\"
 
