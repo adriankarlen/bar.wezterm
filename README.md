@@ -5,9 +5,11 @@ A tab bar configuration for wezterm, this configuration is heavily inspired by [
 ## 📷
 
 ### Rosé Pine
+
 ![image](https://raw.githubusercontent.com/adriankarlen/bar.wezterm/main/misc/rose-pine.png)
 
 ### Catppuccin Mocha
+
 ![image](https://raw.githubusercontent.com/adriankarlen/bar.wezterm/main/misc/catppuccin-mocha.png)
 &nbsp;
 
@@ -26,7 +28,19 @@ bar.apply_to_config(config)
 
 ## 🛠️ Configuration
 
-The `apply_to_config`-function takes a second param `opts`.
+The `apply_to_config`-function takes a second param `opts`. To override any options simply pass a table of the desired changes.
+
+```lua
+bar.apply_to_config(
+  config,
+  {
+    enabled_modules = {
+      username = false,
+      clock = false
+    }
+  }
+)
+```
 
 ### 🏭 Default configuration
 
