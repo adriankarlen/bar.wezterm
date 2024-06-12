@@ -133,14 +133,28 @@ M.apply_to_config = function(c, opts)
   -- combine user config with defaults
   config = tableMerge(config, opts)
 
-  if c.colors == nil then
-    local scheme = wez.color.get_builtin_schemes()[c.color_scheme]
-    c.colors = {
-      tab_bar = {
-        background = scheme.background,
+  local scheme = wez.color.get_builtin_schemes()[c.color_scheme]
+  local default_colors = {
+    tab_bar = {
+      background = scheme.background,
+      active_tab = {
+        bg_color = scheme.background,
+        fg_color = scheme.ansi[4],
       },
-    }
+      inactive_tab = {
+        bg_color = scheme.background,
+        fg_color = scheme.ansi[6],
+      },
+    },
+  }
+
+  if c.colors == nil then
+    c.colors = default_colors
+  else
+    c.colors = tableMerge(default_colors, c.colors)
+    wez.log_info(c.colors)
   end
+
   c.use_fancy_tab_bar = false
   c.tab_bar_at_bottom = config.position == "bottom"
   c.tab_max_width = config.max_width
@@ -148,24 +162,27 @@ end
 
 wez.on("format-tab-title", function(tab, _, _, conf, _, _)
   local palette = conf.resolved_palette
+
   local index = tab.tab_index + 1
-  local title = index .. config.left_separator .. tab_title(tab) .. "  "
-  local fg = palette.ansi[6]
+  local offset = #index + #config.left_separator + 2
+  local title = index .. config.left_separator .. tab_title(tab)
 
-  if tab.is_active then
-    fg = palette.ansi[4]
-  end
-
-  local fillerwidth = 4 + index
-  local width = conf.tab_max_width - fillerwidth - 1
-  if (#title + fillerwidth) > conf.tab_max_width then
+  local width = conf.tab_max_width - offset
+  if #title > conf.tab_max_width then
     title = wez.truncate_right(title, width) .. "…"
   end
 
+  local fg = palette.tab_bar.inactive_tab.fg_color
+  local bg = palette.tab_bar.inactive_tab.bg_color
+  if tab.is_active then
+    fg = palette.tab_bar.active_tab.fg_color
+    bg = palette.tab_bar.active_tab.bg_color
+  end
+
   return {
-    { Background = { Color = palette.tab_bar.background } },
+    { Background = { Color = bg } },
     { Foreground = { Color = fg } },
-    { Text = title },
+    { Text = title .. "  " },
   }
 end)
 
