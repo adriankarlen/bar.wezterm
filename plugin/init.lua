@@ -164,7 +164,7 @@ wez.on("format-tab-title", function(tab, _, _, conf, _, _)
   local palette = conf.resolved_palette
 
   local index = tab.tab_index + 1
-  local offset = #index + #config.left_separator + 2
+  local offset = #tostring(index) + #config.left_separator + 2
   local title = index .. config.left_separator .. tab_title(tab)
 
   local width = conf.tab_max_width - offset
