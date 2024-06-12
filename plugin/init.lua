@@ -20,7 +20,7 @@ local config = {
   },
 }
 
-local username = os.getenv('USER') or os.getenv('LOGNAME') or os.getenv('USERNAME')
+local username = os.getenv "USER" or os.getenv "LOGNAME" or os.getenv "USERNAME"
 local home = (os.getenv "USERPROFILE" or os.getenv "HOME" or wez.home_dir or ""):gsub("\\", "/")
 local is_windows = package.config:sub(1, 1) == "\\"
 
@@ -144,8 +144,6 @@ M.apply_to_config = function(c, opts)
   c.use_fancy_tab_bar = false
   c.tab_bar_at_bottom = config.position == "bottom"
   c.tab_max_width = config.max_width
-
-  -- get user name and store to GLOBAL
 end
 
 wez.on("format-tab-title", function(tab, _, _, conf, _, _)
@@ -177,8 +175,6 @@ wez.on("update-status", function(window, pane)
   if not present then
     return
   end
-
-  wez.log_info(pane:get_foreground_process_name())
 
   local palette = conf.resolved_palette
 
