@@ -90,10 +90,10 @@ return {
 | Color option                    | Default             |
 | ------------------------------- | ------------------- |
 | `tab_bar.background`            | `scheme.background` |
-| `tab_bar.active_tab`.bg_color   | `scheme.background` |
-| `tab_bar.active_tab`.fg_color   | `scheme.ansi`[4]    |
-| `tab_bar.inactive_tab`.bg_color | `scheme.background` |
-| `tab_bar.inactive_tab`.fg_color | `scheme.ansi`[6]    |
+| `tab_bar.active_tab.bg_color`   | `scheme.background` |
+| `tab_bar.active_tab.fg_color`   | `scheme.ansi[4]`    |
+| `tab_bar.inactive_tab.bg_color` | `scheme.background` |
+| `tab_bar.inactive_tab.fg_color` | `scheme.ansi[6]`    |
 
 ## 📜 License
 
