@@ -4,11 +4,11 @@ A tab bar configuration for wezterm, this configuration is heavily inspired by [
 
 ## 📷
 
-### Rosé Pine
+### 🌷 Rosé Pine
 
 ![image](https://raw.githubusercontent.com/adriankarlen/bar.wezterm/main/misc/rose-pine.png)
 
-### Catppuccin Mocha
+### 😸 Catppuccin Mocha
 
 ![image](https://raw.githubusercontent.com/adriankarlen/bar.wezterm/main/misc/catppuccin-mocha.png)
 &nbsp;
@@ -67,6 +67,33 @@ bar.apply_to_config(
   },
 }
 ```
+
+### 🎨 Colors
+
+At the moment is not possible to pass in colors as option to the plugin. However since the plugin uses your themes colors you can configure the theme to get a different result. For instance, if I want to change the active tab background color I can do so like this:
+
+```lua
+return {
+  -- ... your existing config
+  colors = {
+    tab_bar = {
+      active_tab = {
+        bg_color = "#26233a"
+      }
+    }
+  }
+}
+```
+
+#### 🖌️ Color table
+
+| Color option                  | Default           |
+| ----------------------------- | ----------------- |
+| tab_bar.background            | scheme.background |
+| tab_bar.active_tab.bg_color   | scheme.background |
+| tab_bar.active_tab.fg_color   | scheme.ansi[4]    |
+| tab_bar.inactive_tab.bg_color | scheme.background |
+| tab_bar.inactive_tab.fg_color | scheme.ansi[6]    |
 
 ## 📜 License
 
