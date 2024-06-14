@@ -150,13 +150,13 @@ M.apply_to_config = function(c, opts)
   local scheme = wez.color.get_builtin_schemes()[c.color_scheme]
   local default_colors = {
     tab_bar = {
-      background = scheme.background,
+      background = "transparent",
       active_tab = {
-        bg_color = scheme.background,
+        bg_color = "transparent",
         fg_color = scheme.ansi[4],
       },
       inactive_tab = {
-        bg_color = scheme.background,
+        bg_color = "transparent",
         fg_color = scheme.ansi[6],
       },
     },
@@ -166,7 +166,6 @@ M.apply_to_config = function(c, opts)
     c.colors = default_colors
   else
     c.colors = tableMerge(default_colors, c.colors)
-    wez.log_info(c.colors)
   end
 
   c.use_fancy_tab_bar = false
