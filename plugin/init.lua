@@ -122,6 +122,20 @@ local get_cwd_hostname = function(pane, search_git_root_instead)
   return cwd, hostname
 end
 
+local basename = function(path) -- get filename from path
+  if type(path) ~= "string" then
+    return nil
+  end
+  local file = ""
+  if M.is_windows then
+    file = path:gsub("(.*[/\\])(.*)", "%2") -- replace (path/ or path\)(file) with (file)
+  else
+    file = path:gsub("(.*/)(.*)", "%2") -- replace (path/)(file) with (file)
+  end
+  -- remove extension
+  file = file:gsub("(%..+)$", "")
+  return file
+end
 -- conforming to https://github.com/wez/wezterm/commit/e4ae8a844d8feaa43e1de34c5cc8b4f07ce525dd
 -- exporting an apply_to_config function, even though we don't change the users config
 M.apply_to_config = function(c, opts)
@@ -210,7 +224,7 @@ wez.on("update-status", function(window, pane)
     { Text = stat },
 
     { Foreground = { Color = palette.ansi[7] } },
-    { Text = config.pane_icon .. " " .. pane:get_title() .. " " },
+    { Text = config.pane_icon .. " " .. basename(pane:get_title()) .. " " },
   })
 
   -- right status
