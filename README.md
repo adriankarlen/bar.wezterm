@@ -4,6 +4,8 @@ A tab bar configuration for wezterm, this configuration is heavily inspired by [
 
 ## 📷
 
+![image](https://raw.githubusercontent.com/adriankarlen/bar.wezterm/main/misc/preview.png)
+
 ### 🌷 Rosé Pine
 
 ![image](https://raw.githubusercontent.com/adriankarlen/bar.wezterm/main/misc/rose-pine.png)
