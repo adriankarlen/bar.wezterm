@@ -52,9 +52,10 @@ bar.apply_to_config(
 {
   position = "bottom",
   max_width = 32,
-  left_separator = " -> ",
-  right_separator = " <- ",
+  left_separator = "  ",
+  right_separator = "  ",
   field_separator = "  |  ",
+  leader_icon = "",
   workspace_icon = "",
   pane_icon = "",
   user_icon = "",
@@ -67,12 +68,26 @@ bar.apply_to_config(
     clock = true,
     cwd = true,
   },
+  ansi_colors = {
+    workspace = 8,
+    leader = 2,
+    pane = 4,
+    active_tab = 6,
+    inactive_tab = 5,
+    username = 5,
+    hostname = 8,
+    clock = 7,
+    cwd = 4,
+  },
 }
 ```
 
 ### 🎨 Colors
 
-At the moment is not possible to pass in colors as option to the plugin. However since the plugin uses your themes colors you can configure the theme to get a different result. For instance, if I want to change the active tab background color I can do so like this:
+Every ansi color used is configurable, to change a color, pass in the desired
+ansi code to use for a specific setting.
+
+If you want to change any other color used, since the plugin uses your themes colors you can configure the theme to get a different result. For instance, if I want to change the active tab background color I can do so like this:
 
 ```lua
 return {
@@ -89,13 +104,11 @@ return {
 
 #### 🖌️ Color table
 
-| Color option                    | Default          |
-| ------------------------------- | ---------------- |
-| `tab_bar.background`            | `transparent`  |
-| `tab_bar.active_tab.bg_color`   | `transparent`  |
-| `tab_bar.active_tab.fg_color`   | `scheme.ansi[4]` |
-| `tab_bar.inactive_tab.bg_color` | `transparent`  |
-| `tab_bar.inactive_tab.fg_color` | `scheme.ansi[6]` |
+| Color option                    | Default       |
+| ------------------------------- | ------------- |
+| `tab_bar.background`            | `transparent` |
+| `tab_bar.active_tab.bg_color`   | `transparent` |
+| `tab_bar.inactive_tab.bg_color` | `transparent` |
 
 ## 📜 License
 

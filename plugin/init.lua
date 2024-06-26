@@ -19,6 +19,17 @@ local config = {
     clock = true,
     cwd = true,
   },
+  ansi_colors = {
+    workspace = 8,
+    leader = 2,
+    pane = 4,
+    active_tab = 6,
+    inactive_tab = 5,
+    username = 5,
+    hostname = 8,
+    clock = 7,
+    cwd = 4,
+  },
 }
 
 local username = os.getenv "USER" or os.getenv "LOGNAME" or os.getenv "USERNAME"
@@ -172,11 +183,11 @@ M.apply_to_config = function(c, opts)
       background = "transparent",
       active_tab = {
         bg_color = "transparent",
-        fg_color = scheme.ansi[4],
+        fg_color = scheme.ansi[config.ansi_colors.active_tab],
       },
       inactive_tab = {
         bg_color = "transparent",
-        fg_color = scheme.ansi[6],
+        fg_color = scheme.ansi[config.ansi_colors.inactive_tab],
       },
     },
   }
@@ -229,10 +240,10 @@ wez.on("update-status", function(window, pane)
 
   -- left status
   local stat = " " .. config.workspace_icon .. " " .. window:active_workspace() .. " "
-  local stat_fg = palette.foreground
+  local stat_fg = palette.ansi[config.ansi_colors.workspace]
 
   if window:leader_is_active() then
-    stat_fg = palette.ansi[2]
+    stat_fg = palette.ansi[config.ansi_colors.leader]
     stat = get_leader(stat)
   end
 
@@ -241,7 +252,7 @@ wez.on("update-status", function(window, pane)
     { Foreground = { Color = stat_fg } },
     { Text = stat },
 
-    { Foreground = { Color = palette.ansi[7] } },
+    { Foreground = { Color = palette.ansi[config.ansi_colors.pane] } },
     { Text = config.pane_icon .. " " .. basename(pane:get_title()) .. " " },
   })
 
@@ -252,7 +263,7 @@ wez.on("update-status", function(window, pane)
   local enabled_modules = config.enabled_modules
 
   if enabled_modules.username then
-    table.insert(cells, { Foreground = { Color = palette.ansi[6] } })
+    table.insert(cells, { Foreground = { Color = palette.ansi[config.ansi_colors.username] } })
     table.insert(cells, { Text = username })
     table.insert(cells, { Foreground = { Color = palette.brights[1] } })
     table.insert(cells, { Text = config.right_separator .. config.user_icon .. config.field_separator })
@@ -260,14 +271,14 @@ wez.on("update-status", function(window, pane)
 
   local cwd, hostname = get_cwd_hostname(pane, true)
   if enabled_modules.hostname then
-    table.insert(cells, { Foreground = { Color = palette.ansi[8] } })
+    table.insert(cells, { Foreground = { Color = palette.ansi[config.ansi_colors.hostname] } })
     table.insert(cells, { Text = hostname })
     table.insert(cells, { Foreground = { Color = palette.brights[1] } })
     table.insert(cells, { Text = config.right_separator .. config.hostname_icon .. config.field_separator })
   end
 
   if enabled_modules.clock then
-    table.insert(cells, { Foreground = { Color = palette.ansi[5] } })
+    table.insert(cells, { Foreground = { Color = palette.ansi[config.ansi_colors.clock] } })
     table.insert(cells, { Text = wez.time.now():format "%H:%M" })
     table.insert(cells, { Foreground = { Color = palette.brights[1] } })
     table.insert(cells, { Text = config.right_separator .. config.clock_icon .. "  " })
@@ -276,7 +287,7 @@ wez.on("update-status", function(window, pane)
   if enabled_modules.cwd then
     table.insert(cells, { Foreground = { Color = palette.brights[1] } })
     table.insert(cells, { Text = config.cwd_icon .. " " })
-    table.insert(cells, { Foreground = { Color = palette.ansi[7] } })
+    table.insert(cells, { Foreground = { Color = palette.ansi[config.ansi_colors.cwd] } })
     table.insert(cells, { Text = cwd .. " " })
   end
 
