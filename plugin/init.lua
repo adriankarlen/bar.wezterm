@@ -6,6 +6,7 @@ local config = {
   left_separator = "  ",
   right_separator = "  ",
   field_separator = "  |  ",
+  leader_icon = "",
   workspace_icon = "",
   pane_icon = "",
   user_icon = "",
@@ -137,6 +138,23 @@ local function tab_title(tab_info)
   return basename(tab_info.active_pane.title)
 end
 
+local get_leader = function(prev)
+  local leader = config.leader_icon
+
+  wez.log_info("prev: " .. prev)
+  wez.log_info("prev size: " .. #prev)
+  wez.log_info("leader: " .. leader)
+  wez.log_info("leader size: " .. #leader)
+
+  local spacing = #prev - #leader
+  local first_half = math.floor(spacing / 2)
+  local second_half = math.ceil(spacing / 2)
+  wez.log_info("spacing: " .. spacing)
+  wez.log_info("first_half: " .. first_half)
+  wez.log_info("second_half: " .. second_half)
+  return string.rep(" ", first_half) .. leader .. string.rep(" ", second_half)
+end
+
 -- conforming to https://github.com/wez/wezterm/commit/e4ae8a844d8feaa43e1de34c5cc8b4f07ce525dd
 -- exporting an apply_to_config function, even though we don't change the users config
 M.apply_to_config = function(c, opts)
@@ -215,7 +233,7 @@ wez.on("update-status", function(window, pane)
 
   if window:leader_is_active() then
     stat_fg = palette.ansi[2]
-    stat = " leader "
+    stat = get_leader(stat)
   end
 
   window:set_left_status(wez.format {
