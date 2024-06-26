@@ -22,13 +22,13 @@ local config = {
   ansi_colors = {
     workspace = 8,
     leader = 2,
-    pane = 4,
-    active_tab = 6,
-    inactive_tab = 5,
-    username = 5,
+    pane = 7,
+    active_tab = 4,
+    inactive_tab = 6,
+    username = 6,
     hostname = 8,
-    clock = 7,
-    cwd = 4,
+    clock = 5,
+    cwd = 7,
   },
 }
 
