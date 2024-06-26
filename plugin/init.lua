@@ -26,17 +26,6 @@ local is_windows = package.config:sub(1, 1) == "\\"
 
 local M = {}
 
-local function tab_title(tab_info)
-  local title = tab_info.tab_title
-  -- if the tab title is explicitly set, take that
-  if title and #title > 0 then
-    return title
-  end
-  -- Otherwise, use the title from the active pane
-  -- in that tab
-  return tab_info.active_pane.title
-end
-
 local function tableMerge(t1, t2)
   for k, v in pairs(t2) do
     if type(v) == "table" then
@@ -136,6 +125,18 @@ local basename = function(path) -- get filename from path
   file = file:gsub("(%..+)$", "")
   return file
 end
+
+local function tab_title(tab_info)
+  local title = tab_info.tab_title
+  -- if the tab title is explicitly set, take that
+  if title and #title > 0 then
+    return title
+  end
+  -- Otherwise, use the title from the active pane
+  -- in that tab
+  return basename(tab_info.active_pane.title)
+end
+
 -- conforming to https://github.com/wez/wezterm/commit/e4ae8a844d8feaa43e1de34c5cc8b4f07ce525dd
 -- exporting an apply_to_config function, even though we don't change the users config
 M.apply_to_config = function(c, opts)
