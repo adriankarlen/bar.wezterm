@@ -38,11 +38,11 @@ local is_windows = package.config:sub(1, 1) == "\\"
 
 local M = {}
 
-local function tableMerge(t1, t2)
+local function table_merge(t1, t2)
   for k, v in pairs(t2) do
     if type(v) == "table" then
       if type(t1[k] or false) == "table" then
-        tableMerge(t1[k] or {}, t2[k] or {})
+        table_merge(t1[k] or {}, t2[k] or {})
       else
         t1[k] = v
       end
@@ -175,7 +175,7 @@ M.apply_to_config = function(c, opts)
   end
 
   -- combine user config with defaults
-  config = tableMerge(config, opts)
+  config = table_merge(config, opts)
 
   local scheme = wez.color.get_builtin_schemes()[c.color_scheme]
   local default_colors = {
@@ -195,7 +195,7 @@ M.apply_to_config = function(c, opts)
   if c.colors == nil then
     c.colors = default_colors
   else
-    c.colors = tableMerge(default_colors, c.colors)
+    c.colors = table_merge(default_colors, c.colors)
   end
 
   c.use_fancy_tab_bar = false
