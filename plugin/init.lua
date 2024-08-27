@@ -125,19 +125,11 @@ local get_cwd_hostname = function(pane, search_git_root_instead)
   return cwd, hostname
 end
 
-local basename = function(path) -- get filename from path
-  if type(path) ~= "string" then
+local basename = function(s)
+  if type(s) ~= "string" then
     return nil
   end
-  local file = ""
-  if M.is_windows then
-    file = path:gsub("(.*[/\\])(.*)", "%2") -- replace (path/ or path\)(file) with (file)
-  else
-    file = path:gsub("(.*/)(.*)", "%2") -- replace (path/)(file) with (file)
-  end
-  -- remove extension
-  file = file:gsub("(%..+)$", "")
-  return file
+  return s:gsub("(.*[/\\])(.*)%.(.*)", "%2")
 end
 
 local function tab_title(tab_info)
@@ -260,10 +252,15 @@ wez.on("update-status", function(window, pane)
   end
 
   if enabled_modules.pane then
+    local process = pane:get_foreground_process_name()
+    if not process then
+      goto set_left_status
+    end
     table.insert(left_cells, { Foreground = { Color = palette.ansi[config.ansi_colors.pane] } })
-    table.insert(left_cells, { Text = config.pane_icon .. " " .. basename(pane:get_title()) .. " " })
+    table.insert(left_cells, { Text = config.pane_icon .. " " .. basename(process) .. " " })
   end
 
+  ::set_left_status::
   window:set_left_status(wez.format(left_cells))
 
   -- right status
