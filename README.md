@@ -49,20 +49,23 @@ bar.apply_to_config(
 > NOTE: The default config requires that you are using a Nerd Font or has "Symbols Nerd Font" installed on your system so wezterm can default to it.
 
 ```lua
-{
+local config = {
   position = "bottom",
   max_width = 32,
-  left_separator = "  ",
-  right_separator = "  ",
-  field_separator = "  |  ",
-  leader_icon = "",
-  workspace_icon = "",
-  pane_icon = "",
-  user_icon = "",
-  hostname_icon = "󰒋",
-  clock_icon = "󰃰",
-  cwd_icon = "",
+  separator_space = 1,
+  left_separator = wez.nerdfonts.fa_long_arrow_right,
+  right_separator = wez.nerdfonts.fa_long_arrow_left,
+  field_separator = wez.nerdfonts.indent_line,
+  leader_icon = wez.nerdfonts.oct_rocket,
+  workspace_icon = wez.nerdfonts.cod_window,
+  pane_icon = wez.nerdfonts.cod_multiple_windows,
+  user_icon = wez.nerdfonts.fa_user,
+  hostname_icon = wez.nerdfonts.cod_server,
+  clock_icon = wez.nerdfonts.md_calendar_clock,
+  cwd_icon = wez.nerdfonts.oct_file_directory,
   enabled_modules = {
+    workspace = true,
+    pane = true,
     username = true,
     hostname = true,
     clock = true,

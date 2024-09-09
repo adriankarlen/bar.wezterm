@@ -3,16 +3,17 @@ local wez = require "wezterm"
 local config = {
   position = "bottom",
   max_width = 32,
-  left_separator = "  ",
-  right_separator = "  ",
-  field_separator = "  |  ",
-  leader_icon = "",
-  workspace_icon = "",
-  pane_icon = "",
-  user_icon = "",
-  hostname_icon = "󰒋",
-  clock_icon = "󰃰",
-  cwd_icon = "",
+  separator_space = 1,
+  left_separator = wez.nerdfonts.fa_long_arrow_right,
+  right_separator = wez.nerdfonts.fa_long_arrow_left,
+  field_separator = wez.nerdfonts.indent_line,
+  leader_icon = wez.nerdfonts.oct_rocket,
+  workspace_icon = wez.nerdfonts.cod_window,
+  pane_icon = wez.nerdfonts.cod_multiple_windows,
+  user_icon = wez.nerdfonts.fa_user,
+  hostname_icon = wez.nerdfonts.cod_server,
+  clock_icon = wez.nerdfonts.md_calendar_clock,
+  cwd_icon = wez.nerdfonts.oct_file_directory,
   enabled_modules = {
     workspace = true,
     pane = true,
@@ -145,19 +146,18 @@ end
 
 local get_leader = function(prev)
   local leader = config.leader_icon
-
-  wez.log_info("prev: " .. prev)
-  wez.log_info("prev size: " .. #prev)
-  wez.log_info("leader: " .. leader)
-  wez.log_info("leader size: " .. #leader)
-
   local spacing = #prev - #leader
   local first_half = math.floor(spacing / 2)
   local second_half = math.ceil(spacing / 2)
-  wez.log_info("spacing: " .. spacing)
-  wez.log_info("first_half: " .. first_half)
-  wez.log_info("second_half: " .. second_half)
   return string.rep(" ", first_half) .. leader .. string.rep(" ", second_half)
+end
+
+local with_spaces = function(icon, space)
+  if type(icon) ~= "string" or type(space) ~= "number" then
+    return ""
+  end
+  local spaces = string.rep(" ", space)
+  return spaces .. icon .. spaces
 end
 
 -- conforming to https://github.com/wez/wezterm/commit/e4ae8a844d8feaa43e1de34c5cc8b4f07ce525dd
@@ -201,8 +201,9 @@ wez.on("format-tab-title", function(tab, _, _, conf, _, _)
   local palette = conf.resolved_palette
 
   local index = tab.tab_index + 1
-  local offset = #tostring(index) + #config.left_separator + 2
-  local title = index .. config.left_separator .. tab_title(tab)
+  local offset = #tostring(index) + #config.left_separator + (2 * config.separator_space) + 2
+  wez.log_info(offset)
+  local title = index .. with_spaces(config.left_separator, config.separator_space) .. tab_title(tab)
 
   local width = conf.tab_max_width - offset
   if #title > conf.tab_max_width then
@@ -272,7 +273,11 @@ wez.on("update-status", function(window, pane)
     table.insert(right_cells, { Foreground = { Color = palette.ansi[config.ansi_colors.username] } })
     table.insert(right_cells, { Text = username })
     table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
-    table.insert(right_cells, { Text = config.right_separator .. config.user_icon .. config.field_separator })
+    table.insert(right_cells, {
+      Text = with_spaces(config.right_separator, config.separator_space)
+        .. config.user_icon
+        .. with_spaces(config.field_separator, config.separator_space),
+    })
   end
 
   local cwd, hostname = get_cwd_hostname(pane, true)
@@ -280,14 +285,21 @@ wez.on("update-status", function(window, pane)
     table.insert(right_cells, { Foreground = { Color = palette.ansi[config.ansi_colors.hostname] } })
     table.insert(right_cells, { Text = hostname })
     table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
-    table.insert(right_cells, { Text = config.right_separator .. config.hostname_icon .. config.field_separator })
+    table.insert(right_cells, {
+      Text = with_spaces(config.right_separator, config.separator_space)
+        .. config.hostname_icon
+        .. with_spaces(config.field_separator, config.separator_space),
+    })
   end
 
   if enabled_modules.clock then
     table.insert(right_cells, { Foreground = { Color = palette.ansi[config.ansi_colors.clock] } })
     table.insert(right_cells, { Text = wez.time.now():format "%H:%M" })
     table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
-    table.insert(right_cells, { Text = config.right_separator .. config.clock_icon .. "  " })
+    table.insert(
+      right_cells,
+      { Text = with_spaces(config.right_separator, config.separator_space) .. config.clock_icon .. "  " }
+    )
   end
 
   if enabled_modules.cwd then
