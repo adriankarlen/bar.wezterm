@@ -3,35 +3,52 @@ local wez = require "wezterm"
 local config = {
   position = "bottom",
   max_width = 32,
-  separator_space = 1,
-  left_separator = wez.nerdfonts.fa_long_arrow_right,
-  right_separator = wez.nerdfonts.fa_long_arrow_left,
-  field_separator = wez.nerdfonts.indent_line,
-  leader_icon = wez.nerdfonts.oct_rocket,
-  workspace_icon = wez.nerdfonts.cod_window,
-  pane_icon = wez.nerdfonts.cod_multiple_windows,
-  user_icon = wez.nerdfonts.fa_user,
-  hostname_icon = wez.nerdfonts.cod_server,
-  clock_icon = wez.nerdfonts.md_calendar_clock,
-  cwd_icon = wez.nerdfonts.oct_file_directory,
-  enabled_modules = {
-    workspace = true,
-    pane = true,
-    username = true,
-    hostname = true,
-    clock = true,
-    cwd = true,
+  separator = {
+    space = 1,
+    left_icon = wez.nerdfonts.fa_long_arrow_right,
+    right_icon = wez.nerdfonts.fa_long_arrow_left,
+    field_icon = wez.nerdfonts.indent_line,
   },
-  ansi_colors = {
-    workspace = 8,
-    leader = 2,
-    pane = 7,
-    active_tab = 4,
-    inactive_tab = 6,
-    username = 6,
-    hostname = 8,
-    clock = 5,
-    cwd = 7,
+  modules = {
+    tabs = {
+      active_tab_fg = 4,
+      inactive_tab_fg = 6,
+    },
+    workspace = {
+      enabled = true,
+      icon = wez.nerdfonts.cod_window,
+      color = 8,
+    },
+    leader = {
+      enabled = true,
+      icon = wez.nerdfonts.oct_rocket,
+      color = 2,
+    },
+    pane = {
+      enabled = true,
+      icon = wez.nerdfonts.cod_multiple_windows,
+      color = 7,
+    },
+    username = {
+      enabled = true,
+      icon = wez.nerdfonts.fa_user,
+      color = 6,
+    },
+    hostname = {
+      enabled = true,
+      icon = wez.nerdfonts.cod_server,
+      color = 8,
+    },
+    clock = {
+      enabled = true,
+      icon = wez.nerdfonts.md_calendar_clock,
+      color = 5,
+    },
+    cwd = {
+      enabled = true,
+      icon = wez.nerdfonts.oct_file_directory,
+      color = 7,
+    },
   },
 }
 
@@ -41,11 +58,38 @@ local is_windows = package.config:sub(1, 1) == "\\"
 
 local M = {}
 
-local function table_merge(t1, t2)
+-- get basename for dir/file, removing ft and path
+local _basename = function(s)
+  if type(s) ~= "string" then
+    return nil
+  end
+  return s:gsub("(.*[/\\])(.*)%.(.*)", "%2")
+end
+
+-- add spaces to each side of a string
+local _space = function(s, space, trailing_space)
+  if type(s) ~= "string" or type(space) ~= "number" then
+    return ""
+  end
+  local spaces = string.rep(" ", space)
+  local trailing_spaces = spaces
+  if trailing_space ~= nil then
+    trailing_spaces = string.rep(" ", trailing_space)
+  end
+  return spaces .. s .. trailing_spaces
+end
+
+-- trim string from trailing spaces and newlines
+local function _trim(s)
+  return s:match "^%s*(.-)%s*$"
+end
+
+-- merges two tables
+local function _merge(t1, t2)
   for k, v in pairs(t2) do
     if type(v) == "table" then
       if type(t1[k] or false) == "table" then
-        table_merge(t1[k] or {}, t2[k] or {})
+        _merge(t1[k] or {}, t2[k] or {})
       else
         t1[k] = v
       end
@@ -126,14 +170,8 @@ local get_cwd_hostname = function(pane, search_git_root_instead)
   return cwd, hostname
 end
 
-local basename = function(s)
-  if type(s) ~= "string" then
-    return nil
-  end
-  return s:gsub("(.*[/\\])(.*)%.(.*)", "%2")
-end
-
-local function tab_title(tab_info)
+-- get tab title
+local function get_tab_title(tab_info)
   local title = tab_info.tab_title
   -- if the tab title is explicitly set, take that
   if title and #title > 0 then
@@ -141,27 +179,19 @@ local function tab_title(tab_info)
   end
   -- Otherwise, use the title from the active pane
   -- in that tab
-  return basename(tab_info.active_pane.title)
+  return _basename(tab_info.active_pane.title)
 end
 
+-- get leader icon/string if make it occupy the space of the workspace name
 local get_leader = function(prev)
-  local leader = config.leader_icon
+  local leader = config.modules.leader.icon
   local spacing = #prev - #leader
   local first_half = math.floor(spacing / 2)
   local second_half = math.ceil(spacing / 2)
-  return string.rep(" ", first_half) .. leader .. string.rep(" ", second_half)
-end
-
-local with_spaces = function(icon, space)
-  if type(icon) ~= "string" or type(space) ~= "number" then
-    return ""
-  end
-  local spaces = string.rep(" ", space)
-  return spaces .. icon .. spaces
+  return _space(leader, first_half, second_half)
 end
 
 -- conforming to https://github.com/wez/wezterm/commit/e4ae8a844d8feaa43e1de34c5cc8b4f07ce525dd
--- exporting an apply_to_config function, even though we don't change the users config
 M.apply_to_config = function(c, opts)
   -- make the opts arg optional
   if not opts then
@@ -169,7 +199,7 @@ M.apply_to_config = function(c, opts)
   end
 
   -- combine user config with defaults
-  config = table_merge(config, opts)
+  config = _merge(config, opts)
 
   local scheme = wez.color.get_builtin_schemes()[c.color_scheme]
   local default_colors = {
@@ -177,11 +207,11 @@ M.apply_to_config = function(c, opts)
       background = "transparent",
       active_tab = {
         bg_color = "transparent",
-        fg_color = scheme.ansi[config.ansi_colors.active_tab],
+        fg_color = scheme.ansi[config.modules.tabs.active_tab_fg],
       },
       inactive_tab = {
         bg_color = "transparent",
-        fg_color = scheme.ansi[config.ansi_colors.inactive_tab],
+        fg_color = scheme.ansi[config.modules.tabs.inactive_tab_fg],
       },
     },
   }
@@ -189,9 +219,10 @@ M.apply_to_config = function(c, opts)
   if c.colors == nil then
     c.colors = default_colors
   else
-    c.colors = table_merge(default_colors, c.colors)
+    c.colors = _merge(default_colors, c.colors)
   end
 
+  -- make the plugin own these settings
   c.use_fancy_tab_bar = false
   c.tab_bar_at_bottom = config.position == "bottom"
   c.tab_max_width = config.max_width
@@ -201,9 +232,8 @@ wez.on("format-tab-title", function(tab, _, _, conf, _, _)
   local palette = conf.resolved_palette
 
   local index = tab.tab_index + 1
-  local offset = #tostring(index) + #config.left_separator + (2 * config.separator_space) + 2
-  wez.log_info(offset)
-  local title = index .. with_spaces(config.left_separator, config.separator_space) .. tab_title(tab)
+  local offset = #tostring(index) + #config.separator.left_icon + (2 * config.separator.space) + 2
+  local title = index .. _space(config.separator.left_icon, config.separator.space, nil) .. get_tab_title(tab)
 
   local width = conf.tab_max_width - offset
   if #title > conf.tab_max_width then
@@ -220,7 +250,7 @@ wez.on("format-tab-title", function(tab, _, _, conf, _, _)
   return {
     { Background = { Color = bg } },
     { Foreground = { Color = fg } },
-    { Text = title .. "  " },
+    { Text = _space(title, 0, 2) },
   }
 end)
 
@@ -232,19 +262,18 @@ wez.on("update-status", function(window, pane)
   end
 
   local palette = conf.resolved_palette
-  local enabled_modules = config.enabled_modules
 
   -- left status
   local left_cells = {
     { Background = { Color = palette.tab_bar.background } },
   }
 
-  if enabled_modules.workspace then
-    local stat = " " .. config.workspace_icon .. " " .. window:active_workspace() .. " "
-    local stat_fg = palette.ansi[config.ansi_colors.workspace]
+  if config.modules.workspace.enabled then
+    local stat = " " .. config.modules.workspace.icon .. " " .. window:active_workspace() .. " "
+    local stat_fg = palette.ansi[config.modules.workspace.color]
 
     if window:leader_is_active() then
-      stat_fg = palette.ansi[config.ansi_colors.leader]
+      stat_fg = palette.ansi[config.modules.leader.color]
       stat = get_leader(stat)
     end
 
@@ -252,13 +281,13 @@ wez.on("update-status", function(window, pane)
     table.insert(left_cells, { Text = stat })
   end
 
-  if enabled_modules.pane then
+  if config.modules.pane.enabled then
     local process = pane:get_foreground_process_name()
     if not process then
       goto set_left_status
     end
-    table.insert(left_cells, { Foreground = { Color = palette.ansi[config.ansi_colors.pane] } })
-    table.insert(left_cells, { Text = config.pane_icon .. " " .. basename(process) .. " " })
+    table.insert(left_cells, { Foreground = { Color = palette.ansi[config.modules.pane.color] } })
+    table.insert(left_cells, { Text = config.modules.pane.icon .. " " .. _basename(process) .. " " })
   end
 
   ::set_left_status::
@@ -269,43 +298,43 @@ wez.on("update-status", function(window, pane)
     { Background = { Color = palette.tab_bar.background } },
   }
 
-  if enabled_modules.username then
-    table.insert(right_cells, { Foreground = { Color = palette.ansi[config.ansi_colors.username] } })
+  if config.modules.username.enabled then
+    table.insert(right_cells, { Foreground = { Color = palette.ansi[config.modules.username.color] } })
     table.insert(right_cells, { Text = username })
     table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
     table.insert(right_cells, {
-      Text = with_spaces(config.right_separator, config.separator_space)
-        .. config.user_icon
-        .. with_spaces(config.field_separator, config.separator_space),
+      Text = _space(config.separator.right_icon, config.separator.space, nil)
+        .. config.modules.username.icon
+        .. _space(config.separator.field_icon, config.separator.space, nil),
     })
   end
 
   local cwd, hostname = get_cwd_hostname(pane, true)
-  if enabled_modules.hostname then
-    table.insert(right_cells, { Foreground = { Color = palette.ansi[config.ansi_colors.hostname] } })
+  if config.modules.hostname.enabled then
+    table.insert(right_cells, { Foreground = { Color = palette.ansi[config.modules.hostname.color] } })
     table.insert(right_cells, { Text = hostname })
     table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
     table.insert(right_cells, {
-      Text = with_spaces(config.right_separator, config.separator_space)
-        .. config.hostname_icon
-        .. with_spaces(config.field_separator, config.separator_space),
+      Text = _space(config.separator.right_icon, config.separator.space, nil)
+        .. config.modules.hostname.icon
+        .. _space(config.separator.field_icon, config.separator.space, nil),
     })
   end
 
-  if enabled_modules.clock then
-    table.insert(right_cells, { Foreground = { Color = palette.ansi[config.ansi_colors.clock] } })
+  if config.modules.clock.enabled then
+    table.insert(right_cells, { Foreground = { Color = palette.ansi[config.modules.clock.color] } })
     table.insert(right_cells, { Text = wez.time.now():format "%H:%M" })
     table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
     table.insert(
       right_cells,
-      { Text = with_spaces(config.right_separator, config.separator_space) .. config.clock_icon .. "  " }
+      { Text = _space(config.separator.right_icon, config.separator.space, nil) .. config.modules.clock.icon .. "  " }
     )
   end
 
-  if enabled_modules.cwd then
+  if config.modules.cwd.enabled then
     table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
-    table.insert(right_cells, { Text = config.cwd_icon .. " " })
-    table.insert(right_cells, { Foreground = { Color = palette.ansi[config.ansi_colors.cwd] } })
+    table.insert(right_cells, { Text = config.modules.cwd.icon .. " " })
+    table.insert(right_cells, { Foreground = { Color = palette.ansi[config.modules.cwd.color] } })
     table.insert(right_cells, { Text = cwd .. " " })
   end
 
