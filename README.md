@@ -36,10 +36,11 @@ The `apply_to_config`-function takes a second param `opts`. To override any opti
 bar.apply_to_config(
   config,
   {
-    enabled_modules = {
-      username = false,
-      clock = false
-    }
+    modules = {
+      username = {
+        enabled = false,
+      },
+    },
   }
 )
 ```
@@ -52,35 +53,52 @@ bar.apply_to_config(
 local config = {
   position = "bottom",
   max_width = 32,
-  separator_space = 1,
-  left_separator = wez.nerdfonts.fa_long_arrow_right,
-  right_separator = wez.nerdfonts.fa_long_arrow_left,
-  field_separator = wez.nerdfonts.indent_line,
-  leader_icon = wez.nerdfonts.oct_rocket,
-  workspace_icon = wez.nerdfonts.cod_window,
-  pane_icon = wez.nerdfonts.cod_multiple_windows,
-  user_icon = wez.nerdfonts.fa_user,
-  hostname_icon = wez.nerdfonts.cod_server,
-  clock_icon = wez.nerdfonts.md_calendar_clock,
-  cwd_icon = wez.nerdfonts.oct_file_directory,
-  enabled_modules = {
-    workspace = true,
-    pane = true,
-    username = true,
-    hostname = true,
-    clock = true,
-    cwd = true,
+  separator = {
+    space = 1,
+    left_icon = wez.nerdfonts.fa_long_arrow_right,
+    right_icon = wez.nerdfonts.fa_long_arrow_left,
+    field_icon = wez.nerdfonts.indent_line,
   },
-  ansi_colors = {
-    workspace = 8,
-    leader = 2,
-    pane = 7,
-    active_tab = 4,
-    inactive_tab = 6,
-    username = 6,
-    hostname = 8,
-    clock = 5,
-    cwd = 7,
+  modules = {
+    tabs = {
+      active_tab_fg = 4,
+      inactive_tab_fg = 6,
+    },
+    workspace = {
+      enabled = true,
+      icon = wez.nerdfonts.cod_window,
+      color = 8,
+    },
+    leader = {
+      enabled = true,
+      icon = wez.nerdfonts.oct_rocket,
+      color = 2,
+    },
+    pane = {
+      enabled = true,
+      icon = wez.nerdfonts.cod_multiple_windows,
+      color = 7,
+    },
+    username = {
+      enabled = true,
+      icon = wez.nerdfonts.fa_user,
+      color = 6,
+    },
+    hostname = {
+      enabled = true,
+      icon = wez.nerdfonts.cod_server,
+      color = 8,
+    },
+    clock = {
+      enabled = true,
+      icon = wez.nerdfonts.md_calendar_clock,
+      color = 5,
+    },
+    cwd = {
+      enabled = true,
+      icon = wez.nerdfonts.oct_file_directory,
+      color = 7,
+    },
   },
 }
 ```
