@@ -1,6 +1,6 @@
 # 🍺 bar.wezterm
 
-A tab bar configuration for wezterm, this configuration is heavily inspired by [rose-pine/tmux](https://github.com/rose-pine/tmux)
+A tab bar configuration for wezterm, this configuration is heavily inspired by [rose-pine/tmux](https://github.com/rose-pine/tmux).
 
 ## 📷
 
@@ -13,6 +13,14 @@ A tab bar configuration for wezterm, this configuration is heavily inspired by [
 ### 😸 Catppuccin Mocha
 
 ![image](https://raw.githubusercontent.com/adriankarlen/bar.wezterm/main/misc/catppuccin-mocha.png)
+&nbsp;
+
+## 📋 Prerequisites
+
+### 🎵Spotify
+
+In order for the spotify integration to work you need to have [spotify-tui](https://github.com/Rigellute/spotify-tui) installed on you system. Follow their installation instructions on how to set it up.
+
 &nbsp;
 
 ## 🚀 Installation
@@ -33,11 +41,12 @@ bar.apply_to_config(config)
 The `apply_to_config`-function takes a second param `opts`. To override any options simply pass a table of the desired changes.
 
 ```lua
+-- example disable spotify module
 bar.apply_to_config(
   config,
   {
     modules = {
-      username = {
+      spotify = {
         enabled = false,
       },
     },
@@ -98,6 +107,12 @@ local config = {
       enabled = true,
       icon = wez.nerdfonts.oct_file_directory,
       color = 7,
+    },
+    spotify = {
+      enabled = true,
+      icon = wez.nerdfonts.fa_spotify,
+      color = 3,
+      max_width = 64,
     },
   },
 }
