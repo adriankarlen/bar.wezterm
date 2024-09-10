@@ -49,6 +49,12 @@ local config = {
       icon = wez.nerdfonts.oct_file_directory,
       color = 7,
     },
+    spotify = {
+      enabled = true,
+      icon = wez.nerdfonts.fa_spotify,
+      color = 3,
+      max_width = 64,
+    },
   },
 }
 
@@ -191,6 +197,35 @@ local get_leader = function(prev)
   return _space(leader, first_half, second_half)
 end
 
+-- format spotify playback, to handle max_width nicely
+local format_playback = function(pb)
+  if #pb <= config.modules.spotify.max_width then
+    return pb
+  end
+
+  -- split on " - "
+  local artist, track = pb:match "^(.-) %- (.+)$"
+  -- get artist before first ","
+  local pb_main_artist = artist:match "([^,]+)" .. " - " .. track
+  if #pb_main_artist <= config.modules.spotify.max_width then
+    return pb_main_artist
+  end
+
+  -- fallback, return track name (trimmed to max width)
+  return track:sub(1, config.modules.spotify.max_width)
+end
+
+-- gets the currently playing song from spotify
+local get_currently_playing = function()
+  -- fetch playback using spotify-tui
+  local success, pb, stderr = wez.run_child_process { "spt", "pb", "--format", "%a - %t" }
+  if not success then
+    wez.log_error(stderr)
+    return ""
+  end
+  return format_playback(_trim(pb))
+end
+
 -- conforming to https://github.com/wez/wezterm/commit/e4ae8a844d8feaa43e1de34c5cc8b4f07ce525dd
 M.apply_to_config = function(c, opts)
   -- make the opts arg optional
@@ -297,6 +332,20 @@ wez.on("update-status", function(window, pane)
   local right_cells = {
     { Background = { Color = palette.tab_bar.background } },
   }
+
+  if config.modules.spotify.enabled then
+    local playback = get_currently_playing()
+    if #playback > 0 then
+      table.insert(right_cells, { Foreground = { Color = palette.ansi[config.modules.spotify.color] } })
+      table.insert(right_cells, { Text = get_currently_playing() })
+      table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
+      table.insert(right_cells, {
+        Text = _space(config.separator.right_icon, config.separator.space, nil)
+          .. config.modules.spotify.icon
+          .. _space(config.separator.field_icon, config.separator.space, nil),
+      })
+    end
+  end
 
   if config.modules.username.enabled then
     table.insert(right_cells, { Foreground = { Color = palette.ansi[config.modules.username.color] } })
