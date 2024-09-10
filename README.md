@@ -21,6 +21,9 @@ A tab bar configuration for wezterm, this configuration is heavily inspired by [
 
 In order for the spotify integration to work you need to have [spotify-tui](https://github.com/Rigellute/spotify-tui) installed on you system. Follow their installation instructions on how to set it up.
 
+> [!IMPORTANT]
+> If you are using the spotify module, I recommend setting `status_update_interval` to quite a high number to avoid spotify request limits. I have it set to `10000`.
+
 &nbsp;
 
 ## 🚀 Installation
