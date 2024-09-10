@@ -334,14 +334,17 @@ wez.on("update-status", function(window, pane)
   }
 
   if config.modules.spotify.enabled then
-    table.insert(right_cells, { Foreground = { Color = palette.ansi[config.modules.spotify.color] } })
-    table.insert(right_cells, { Text = get_currently_playing() })
-    table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
-    table.insert(right_cells, {
-      Text = _space(config.separator.right_icon, config.separator.space, nil)
-        .. config.modules.spotify.icon
-        .. _space(config.separator.field_icon, config.separator.space, nil),
-    })
+    local playback = get_currently_playing()
+    if #playback > 0 then
+      table.insert(right_cells, { Foreground = { Color = palette.ansi[config.modules.spotify.color] } })
+      table.insert(right_cells, { Text = get_currently_playing() })
+      table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
+      table.insert(right_cells, {
+        Text = _space(config.separator.right_icon, config.separator.space, nil)
+          .. config.modules.spotify.icon
+          .. _space(config.separator.field_icon, config.separator.space, nil),
+      })
+    end
   end
 
   if config.modules.username.enabled then
