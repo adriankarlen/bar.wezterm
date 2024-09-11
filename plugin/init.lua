@@ -146,7 +146,7 @@ wez.on("update-status", function(window, pane)
   }
 
   if options.modules.spotify.enabled then
-    local playback = spotify.get_currently_playing(options.modules.spotify.max_width)
+    local playback = spotify.get_currently_playing(options.modules.spotify.max_width, options.modules.spotify.throttle)
     if #playback > 0 then
       table.insert(right_cells, { Foreground = { Color = palette.ansi[options.modules.spotify.color] } })
       table.insert(right_cells, { Text = playback })
