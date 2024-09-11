@@ -1,5 +1,5 @@
 local wez = require "wezterm"
-local utilities = require "plugin.bar.utilities"
+local utilities = require "bar.utilities"
 
 local M = {}
 

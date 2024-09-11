@@ -1,15 +1,10 @@
 local wez = require "wezterm"
-local utilities = require "plugin.bar.utilities"
-local config = require "plugin.bar.config"
-local tabs = require "plugin.bar.tabs"
-local user = require "plugin.bar.user"
-local spotify = require "plugin.bar.spotify"
 
 local M = {}
 local options = {}
 
-local separator = package.config:sub(1, 1) == "\\" and '\\' or '/'
-local plugin_dir = wez.plugin.list()[1].plugin_dir:gsub(separator .. '[^' .. separator .. ']*$', '')
+local separator = package.config:sub(1, 1) == "\\" and "\\" or "/"
+local plugin_dir = wez.plugin.list()[1].plugin_dir:gsub(separator .. "[^" .. separator .. "]*$", "")
 
 --- Checks if the plugin directory exists
 local function directory_exists(path)
@@ -19,20 +14,28 @@ end
 
 --- Returns the name of the package, used when requiring modules
 local function get_require_path()
-  local path = 'httpssCssZssZsgithubsDscomsZsadriankarlensZsbarsDswezterm'
-  local path_trailing_slash = 'httpssCssZssZsgithubsDscomsZsadriankarlensZsbarsDsweztermsZs'
+  local path = "httpssCssZssZsgithubsDscomsZsadriankarlensZsbarsDswezterm"
+  local path_trailing_slash = "httpssCssZssZsgithubsDscomsZsadriankarlensZsbarsDsweztermsZs"
   return directory_exists(path_trailing_slash) and path_trailing_slash or path
 end
 
 package.path = package.path
-  .. ';'
+  .. ";"
   .. plugin_dir
   .. separator
   .. get_require_path()
   .. separator
-  .. 'plugin'
+  .. "plugin"
   .. separator
-  .. '?.lua'
+  .. "?.lua"
+
+local utilities = require "bar.utilities"
+local config = require "bar.config"
+local tabs = require "bar.tabs"
+local user = require "bar.user"
+local spotify = require "bar.spotify"
+local paths = require "bar.paths"
+
 -- conforming to https://github.com/wez/wezterm/commit/e4ae8a844d8feaa43e1de34c5cc8b4f07ce525dd
 M.apply_to_config = function(c, opts)
   -- make the opts arg optional
@@ -75,7 +78,9 @@ wez.on("format-tab-title", function(tab, _, _, conf, _, _)
 
   local index = tab.tab_index + 1
   local offset = #tostring(index) + #options.separator.left_icon + (2 * options.separator.space) + 2
-  local title = index .. utilities._space(options.separator.left_icon, options.separator.space, nil) .. tabs.get_title(tab)
+  local title = index
+    .. utilities._space(options.separator.left_icon, options.separator.space, nil)
+    .. tabs.get_title(tab)
 
   local width = conf.tab_max_width - offset
   if #title > conf.tab_max_width then
@@ -98,7 +103,7 @@ end)
 
 -- Name of workspace
 wez.on("update-status", function(window, pane)
-  local present, conf = pcall(window.effective_options. window)
+  local present, conf = pcall(window.effective_config, window)
   if not present then
     return
   end
@@ -141,7 +146,7 @@ wez.on("update-status", function(window, pane)
   }
 
   if options.modules.spotify.enabled then
-    local playback = spotify.get_currently_playing()
+    local playback = spotify.get_currently_playing(options.modules.spotify.max_width)
     if #playback > 0 then
       table.insert(right_cells, { Foreground = { Color = palette.ansi[options.modules.spotify.color] } })
       table.insert(right_cells, { Text = playback })
@@ -165,7 +170,7 @@ wez.on("update-status", function(window, pane)
     })
   end
 
-  local cwd, hostname = utilities.get_cwd_hostname(pane, true)
+  local cwd, hostname = paths.get_cwd_hostname(pane, true)
   if options.modules.hostname.enabled then
     table.insert(right_cells, { Foreground = { Color = palette.ansi[options.modules.hostname.color] } })
     table.insert(right_cells, { Text = hostname })
@@ -181,10 +186,11 @@ wez.on("update-status", function(window, pane)
     table.insert(right_cells, { Foreground = { Color = palette.ansi[options.modules.clock.color] } })
     table.insert(right_cells, { Text = wez.time.now():format "%H:%M" })
     table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
-    table.insert(
-      right_cells,
-      { Text = utilities._space(options.separator.right_icon, options.separator.space, nil) .. options.modules.clock.icon .. "  " }
-    )
+    table.insert(right_cells, {
+      Text = utilities._space(options.separator.right_icon, options.separator.space, nil)
+        .. options.modules.clock.icon
+        .. "  ",
+    })
   end
 
   if options.modules.cwd.enabled then
