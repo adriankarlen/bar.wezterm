@@ -5,6 +5,10 @@ local wez = require "wezterm"
 H.home = (os.getenv "USERPROFILE" or os.getenv "HOME" or wez.home_dir or ""):gsub("\\", "/")
 H.is_windows = package.config:sub(1, 1) == "\\"
 
+H._wait = function (throttle, last_update)
+  local current_time = os.time()
+  return current_time - last_update < throttle
+end
 
 -- get basename for dir/file, removing ft and path
 H._basename = function(s)
