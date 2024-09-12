@@ -1,4 +1,3 @@
-local wez = require "wezterm"
 local utilities = require "bar.utilities"
 
 local M = {}
