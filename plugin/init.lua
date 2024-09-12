@@ -145,59 +145,51 @@ wez.on("update-status", function(window, pane)
     { Background = { Color = palette.tab_bar.background } },
   }
 
-  if options.modules.spotify.enabled then
-    local playback = spotify.get_currently_playing(options.modules.spotify.max_width, options.modules.spotify.throttle)
-    if #playback > 0 then
-      table.insert(right_cells, { Foreground = { Color = palette.ansi[options.modules.spotify.color] } })
-      table.insert(right_cells, { Text = playback })
+  local callbacks = {
+    {
+      name = "spotify",
+      func = function()
+        return spotify.get_currently_playing(options.modules.spotify.max_width, options.modules.spotify.throttle)
+      end,
+    },
+    {
+      name = "username",
+      func = function()
+        return user.username
+      end,
+    },
+    {
+      name = "hostname",
+      func = function()
+        return wez.hostname()
+      end,
+    },
+    {
+      name = "clock",
+      func = function()
+        return wez.time.now():format "%H:%M"
+      end,
+    },
+    {
+      name = "cwd",
+      func = function()
+        return paths.get_cwd(pane, true)
+      end,
+    },
+  }
+
+  for _, module in ipairs(callbacks) do
+    local text = module.func()
+    if #text > 0 and options.modules[module.name].enabled then
+      table.insert(right_cells, { Foreground = { Color = palette.ansi[options.modules[module.name].color] } })
+      table.insert(right_cells, { Text = text })
       table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
       table.insert(right_cells, {
         Text = utilities._space(options.separator.right_icon, options.separator.space, nil)
-          .. options.modules.spotify.icon
+          .. options.modules[module.name].icon
           .. utilities._space(options.separator.field_icon, options.separator.space, nil),
       })
     end
-  end
-
-  if options.modules.username.enabled then
-    table.insert(right_cells, { Foreground = { Color = palette.ansi[options.modules.username.color] } })
-    table.insert(right_cells, { Text = user.username })
-    table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
-    table.insert(right_cells, {
-      Text = utilities._space(options.separator.right_icon, options.separator.space, nil)
-        .. options.modules.username.icon
-        .. utilities._space(options.separator.field_icon, options.separator.space, nil),
-    })
-  end
-
-  local cwd, hostname = paths.get_cwd_hostname(pane, true)
-  if options.modules.hostname.enabled then
-    table.insert(right_cells, { Foreground = { Color = palette.ansi[options.modules.hostname.color] } })
-    table.insert(right_cells, { Text = hostname })
-    table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
-    table.insert(right_cells, {
-      Text = utilities._space(options.separator.right_icon, options.separator.space, nil)
-        .. options.modules.hostname.icon
-        .. utilities._space(options.separator.field_icon, options.separator.space, nil),
-    })
-  end
-
-  if options.modules.clock.enabled then
-    table.insert(right_cells, { Foreground = { Color = palette.ansi[options.modules.clock.color] } })
-    table.insert(right_cells, { Text = wez.time.now():format "%H:%M" })
-    table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
-    table.insert(right_cells, {
-      Text = utilities._space(options.separator.right_icon, options.separator.space, nil)
-        .. options.modules.clock.icon
-        .. "  ",
-    })
-  end
-
-  if options.modules.cwd.enabled then
-    table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
-    table.insert(right_cells, { Text = options.modules.cwd.icon .. " " })
-    table.insert(right_cells, { Foreground = { Color = palette.ansi[options.modules.cwd.color] } })
-    table.insert(right_cells, { Text = cwd .. " " })
   end
 
   window:set_right_status(wez.format(right_cells))
