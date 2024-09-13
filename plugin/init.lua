@@ -120,8 +120,9 @@ wez.on("update-status", function(window, pane)
     local stat_fg = palette.ansi[options.modules.workspace.color]
 
     if window:leader_is_active() then
+      local leader_stat = " " .. options.modules.leader.icon .. " " .. window:active_workspace() .. " "
       stat_fg = palette.ansi[options.modules.leader.color]
-      stat = utilities._constant_width(stat)
+      stat = utilities._constant_width(stat, leader_stat)
     end
 
     table.insert(left_cells, { Foreground = { Color = stat_fg } })
@@ -129,15 +130,16 @@ wez.on("update-status", function(window, pane)
   end
 
   if options.modules.pane.enabled then
-    local process = pane:get_foreground_process_name()
-    if not process then
-      goto set_left_status
+    local success, result = pcall(function()
+      return pane:get_foreground_process_name()
+    end)
+    if success and result then
+      local process = utilities._basename(result)
+      table.insert(left_cells, { Foreground = { Color = palette.ansi[options.modules.pane.color] } })
+      table.insert(left_cells, { Text = options.modules.pane.icon .. " " .. process .. " " })
     end
-    table.insert(left_cells, { Foreground = { Color = palette.ansi[options.modules.pane.color] } })
-    table.insert(left_cells, { Text = options.modules.pane.icon .. " " .. utilities._basename(process) .. " " })
   end
 
-  ::set_left_status::
   window:set_left_status(wez.format(left_cells))
 
   -- right status
@@ -179,7 +181,10 @@ wez.on("update-status", function(window, pane)
   }
 
   for _, module in ipairs(callbacks) do
-    local text = module.func()
+    local text = (function()
+      local success, result = pcall(module.func)
+      return success and result or ""
+    end)()
     if #text > 0 and options.modules[module.name].enabled then
       table.insert(right_cells, { Foreground = { Color = palette.ansi[options.modules[module.name].color] } })
       table.insert(right_cells, { Text = text })
