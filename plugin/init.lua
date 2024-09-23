@@ -119,9 +119,9 @@ wez.on("update-status", function(window, pane)
     local stat = " " .. options.modules.workspace.icon .. " " .. window:active_workspace() .. " "
     local stat_fg = palette.ansi[options.modules.workspace.color]
 
-    if window:leader_is_active() then
+    if options.modules.leader.enabled and window:leader_is_active() then
       stat_fg = palette.ansi[options.modules.leader.color]
-      stat = utilities._constant_width(stat)
+      stat = utilities._constant_width(stat, options.modules.leader.icon)
     end
 
     table.insert(left_cells, { Foreground = { Color = stat_fg } })
@@ -145,23 +145,23 @@ wez.on("update-status", function(window, pane)
     { Background = { Color = palette.tab_bar.background } },
   }
 
-local callbacks = {
-  spotify = function()
-    return spotify.get_currently_playing(options.modules.spotify.max_width, options.modules.spotify.throttle)
-  end,
-  username = function()
-    return user.username
-  end,
-  hostname = function()
-    return wez.hostname()
-  end,
-  clock = function()
-    return wez.time.now():format "%H:%M"
-  end,
-  cwd = function()
-    return paths.get_cwd(pane, true)
-  end,
-}
+  local callbacks = {
+    spotify = function()
+      return spotify.get_currently_playing(options.modules.spotify.max_width, options.modules.spotify.throttle)
+    end,
+    username = function()
+      return user.username
+    end,
+    hostname = function()
+      return wez.hostname()
+    end,
+    clock = function()
+      return wez.time.now():format "%H:%M"
+    end,
+    cwd = function()
+      return paths.get_cwd(pane, true)
+    end,
+  }
 
   for name, func in pairs(callbacks) do
     if not options.modules[name].enabled then
