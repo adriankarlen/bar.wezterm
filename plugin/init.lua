@@ -68,8 +68,8 @@ M.apply_to_config = function(c, opts)
   end
 
   -- make the plugin own these settings
-  c.use_fancy_tab_bar = false
   c.tab_bar_at_bottom = options.position == "bottom"
+  c.use_fancy_tab_bar = false
   c.tab_max_width = options.max_width
 end
 
@@ -145,51 +145,40 @@ wez.on("update-status", function(window, pane)
     { Background = { Color = palette.tab_bar.background } },
   }
 
-  local callbacks = {
-    {
-      name = "spotify",
-      func = function()
-        return spotify.get_currently_playing(options.modules.spotify.max_width, options.modules.spotify.throttle)
-      end,
-    },
-    {
-      name = "username",
-      func = function()
-        return user.username
-      end,
-    },
-    {
-      name = "hostname",
-      func = function()
-        return wez.hostname()
-      end,
-    },
-    {
-      name = "clock",
-      func = function()
-        return wez.time.now():format "%H:%M"
-      end,
-    },
-    {
-      name = "cwd",
-      func = function()
-        return paths.get_cwd(pane, true)
-      end,
-    },
-  }
+local callbacks = {
+  spotify = function()
+    return spotify.get_currently_playing(options.modules.spotify.max_width, options.modules.spotify.throttle)
+  end,
+  username = function()
+    return user.username
+  end,
+  hostname = function()
+    return wez.hostname()
+  end,
+  clock = function()
+    return wez.time.now():format "%H:%M"
+  end,
+  cwd = function()
+    return paths.get_cwd(pane, true)
+  end,
+}
 
-  for _, module in ipairs(callbacks) do
-    local text = module.func()
-    if #text > 0 and options.modules[module.name].enabled then
-      table.insert(right_cells, { Foreground = { Color = palette.ansi[options.modules[module.name].color] } })
+  for name, func in pairs(callbacks) do
+    if not options.modules[name].enabled then
+      goto continue
+    end
+    local text = func()
+    if #text > 0 then
+      table.insert(right_cells, { Foreground = { Color = palette.ansi[options.modules[name].color] } })
       table.insert(right_cells, { Text = text })
       table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
       table.insert(right_cells, {
         Text = utilities._space(options.separator.right_icon, options.separator.space, nil)
-          .. options.modules[module.name].icon
+          .. options.modules[name].icon
           .. utilities._space(options.separator.field_icon, options.separator.space, nil),
       })
     end
+    ::continue::
   end
 
   window:set_right_status(wez.format(right_cells))
