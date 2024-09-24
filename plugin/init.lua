@@ -146,24 +146,41 @@ wez.on("update-status", function(window, pane)
   }
 
   local callbacks = {
-    spotify = function()
-      return spotify.get_currently_playing(options.modules.spotify.max_width, options.modules.spotify.throttle)
-    end,
-    username = function()
-      return user.username
-    end,
-    hostname = function()
-      return wez.hostname()
-    end,
-    clock = function()
-      return wez.time.now():format "%H:%M"
-    end,
-    cwd = function()
-      return paths.get_cwd(pane, true)
-    end,
+    {
+      name = "spotify",
+      func = function()
+        return spotify.get_currently_playing(options.modules.spotify.max_width, options.modules.spotify.throttle)
+      end,
+    },
+    {
+      name = "username",
+      func = function()
+        return user.username
+      end,
+    },
+    {
+      name = "hostname",
+      func = function()
+        return wez.hostname()
+      end,
+    },
+    {
+      name = "clock",
+      func = function()
+        return wez.time.now():format "%H:%M"
+      end,
+    },
+    {
+      name = "cwd",
+      func = function()
+        return paths.get_cwd(pane, true)
+      end,
+    },
   }
 
-  for name, func in pairs(callbacks) do
+  for _, callback in ipairs(callbacks) do
+    local name = callback.name
+    local func = callback.func
     if not options.modules[name].enabled then
       goto continue
     end
