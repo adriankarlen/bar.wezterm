@@ -53,7 +53,7 @@ M.options = {
       color = 7,
     },
     spotify = {
-      enabled = true,
+      enabled = false,
       icon = wez.nerdfonts.fa_spotify,
       color = 3,
       max_width = 64,

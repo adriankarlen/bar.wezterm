@@ -21,6 +21,10 @@ A tab bar configuration for wezterm, this configuration is heavily inspired by [
 
 In order for the spotify integration to work you need to have [spotify-tui](https://github.com/Rigellute/spotify-tui) installed on you system. Follow their installation instructions on how to set it up.
 
+> [!NOTE]
+> bar.wezterm ships with this module disabled, please check example in
+> [Configuration](#%EF%B8%8F-configuration) on how to disable it.
+
 &nbsp;
 
 ## 🚀 Installation
@@ -41,13 +45,13 @@ bar.apply_to_config(config)
 The `apply_to_config`-function takes a second param `opts`. To override any options simply pass a table of the desired changes.
 
 ```lua
--- example disable spotify module
+-- example enable spotify module
 bar.apply_to_config(
   config,
   {
     modules = {
       spotify = {
-        enabled = false,
+        enabled = true,
       },
     },
   }
@@ -109,7 +113,7 @@ local config = {
       color = 7,
     },
     spotify = {
-      enabled = true,
+      enabled = false,
       icon = wez.nerdfonts.fa_spotify,
       color = 3,
       max_width = 64,
