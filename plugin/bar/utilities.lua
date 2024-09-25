@@ -60,4 +60,19 @@ H._constant_width = function(prev, next)
   return H._space(next, first_half, second_half)
 end
 
+H._command_exists = function(cmd)
+  local handle = io.popen("command -v " .. cmd .. " >/dev/null 2>&1 && echo true || echo false")
+  if handle == nil then
+    return false
+  end
+
+  local result = handle:read("*a")
+  handle:close()
+  if result == nil then
+    return false
+  end
+
+  return result:match("true") ~= nil
+end
+
 return H
