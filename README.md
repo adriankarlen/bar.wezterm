@@ -23,7 +23,7 @@ In order for the spotify integration to work you need to have [spotify-tui](http
 
 > [!NOTE]
 > bar.wezterm ships with this module disabled, please check example in
-> [Configuration](#%EF%B8%8F-configuration) on how to disable it.
+> [Configuration](#%EF%B8%8F-configuration) on how to enable it.
 
 &nbsp;
 
