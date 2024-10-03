@@ -101,7 +101,6 @@ wez.on("format-tab-title", function(tab, _, _, conf, _, _)
   }
 end)
 
--- Name of workspace
 wez.on("update-status", function(window, pane)
   local present, conf = pcall(window.effective_config, window)
   if not present then
@@ -114,6 +113,8 @@ wez.on("update-status", function(window, pane)
   local left_cells = {
     { Background = { Color = palette.tab_bar.background } },
   }
+
+  table.insert(left_cells, { Text = string.rep(" ", options.padding.left) })
 
   if options.modules.workspace.enabled then
     local stat = " " .. options.modules.workspace.icon .. " " .. window:active_workspace() .. " "
@@ -197,6 +198,7 @@ wez.on("update-status", function(window, pane)
     end
     ::continue::
   end
+  table.insert(right_cells, { Text = string.rep(" ", options.padding.right) })
 
   window:set_right_status(wez.format(right_cells))
 end)
