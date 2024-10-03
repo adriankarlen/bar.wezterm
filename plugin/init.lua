@@ -47,6 +47,10 @@ M.apply_to_config = function(c, opts)
   options = config.extend_options(config.options, opts)
 
   local scheme = wez.color.get_builtin_schemes()[c.color_scheme]
+  if scheme == nil then
+    scheme = wez.color.get_default_colors()
+  end
+
   local default_colors = {
     tab_bar = {
       background = "transparent",
@@ -61,11 +65,7 @@ M.apply_to_config = function(c, opts)
     },
   }
 
-  if c.colors == nil then
-    c.colors = default_colors
-  else
-    c.colors = utilities._merge(default_colors, c.colors)
-  end
+  c.colors = utilities._merge(default_colors, scheme)
 
   -- make the plugin own these settings
   c.tab_bar_at_bottom = options.position == "bottom"
