@@ -6,6 +6,10 @@ local M = {}
 M.options = {
   position = "bottom",
   max_width = 32,
+  padding = {
+    left = 1,
+    right = 1,
+  },
   separator = {
     space = 1,
     left_icon = wez.nerdfonts.fa_long_arrow_right,
