@@ -1,6 +1,7 @@
 local wez = require "wezterm"
 local utilities = require "bar.utilities"
 
+---@private
 ---@class bar.config
 local M = {}
 

@@ -1,5 +1,6 @@
 local utilities = require "bar.utilities"
 
+---@private
 ---@class bar.paths
 local M = {}
 

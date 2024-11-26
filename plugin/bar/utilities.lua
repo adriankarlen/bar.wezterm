@@ -1,5 +1,6 @@
 local wez = require "wezterm"
 
+---@private
 ---@class bar.utilities
 local H = {}
 

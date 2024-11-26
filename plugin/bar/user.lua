@@ -1,3 +1,4 @@
+---@private
 ---@class bar.user
 local M = {}
 
