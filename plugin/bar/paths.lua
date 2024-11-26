@@ -1,7 +1,12 @@
 local utilities = require "bar.utilities"
 
+---@private
+---@class bar.paths
 local M = {}
 
+---Finds the git directory starting from the given directory and moving up the directory tree.
+---@param directory string
+---@return string|nil
 local find_git_dir = function(directory)
   directory = directory:gsub("~", utilities.home)
 
@@ -21,6 +26,10 @@ local find_git_dir = function(directory)
   return nil
 end
 
+---gets the current working directory of the given pane.
+---@param pane table
+---@param search_git_root_instead boolean
+---@return string
 M.get_cwd = function(pane, search_git_root_instead)
   local cwd = ""
   local cwd_uri = pane:get_current_working_dir()
@@ -59,4 +68,5 @@ M.get_cwd = function(pane, search_git_root_instead)
 
   return cwd
 end
+
 return M

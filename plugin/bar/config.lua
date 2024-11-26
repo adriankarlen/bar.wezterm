@@ -1,8 +1,45 @@
 local wez = require "wezterm"
 local utilities = require "bar.utilities"
 
+---@private
+---@class bar.config
 local M = {}
 
+---@class option.separator
+---@field space number
+---@field left_icon string
+---@field right_icon string
+---@field field_icon string
+
+---@class option.tabs
+---@field active_tab_fg number
+---@field inactive_tab_fg number
+
+---@class option.module
+---@field enabled boolean
+---@field icon string
+---@field color number
+
+---@class option.spotify : option.module
+---@field max_width number
+---@field throttle number
+
+---@class option.modules
+---@field tabs option.tabs
+---@field workspace option.module
+---@field leader option.module
+---@field pane option.module
+---@field username option.module
+---@field hostname option.module
+---@field clock option.module
+---@field cwd option.module
+---@field spotify option.spotify
+
+---@class bar.options
+---@field position "top" | "bottom"
+---@field max_width number
+---@field separator option.separator
+---@field modules option.modules
 M.options = {
   position = "bottom",
   max_width = 32,
@@ -66,6 +103,9 @@ M.options = {
   },
 }
 
+---@param default bar.options
+---@param options bar.options
+---@return bar.options
 function M.extend_options(default, options)
   return utilities._merge(default, options)
 end

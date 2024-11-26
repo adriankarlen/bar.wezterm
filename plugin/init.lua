@@ -1,18 +1,22 @@
 local wez = require "wezterm"
 
+---@class bar.wezterm
 local M = {}
 local options = {}
 
 local separator = package.config:sub(1, 1) == "\\" and "\\" or "/"
 local plugin_dir = wez.plugin.list()[1].plugin_dir:gsub(separator .. "[^" .. separator .. "]*$", "")
 
---- Checks if the plugin directory exists
+---checks if the plugin directory exists
+---@param path string
+---@return boolean
 local function directory_exists(path)
   local success, result = pcall(wez.read_dir, plugin_dir .. path)
   return success and result
 end
 
---- Returns the name of the package, used when requiring modules
+---returns the name of the package, used when requiring modules
+---@return string
 local function get_require_path()
   local path = "httpssCssZssZsgithubsDscomsZsadriankarlensZsbarsDswezterm"
   local path_trailing_slash = "httpssCssZssZsgithubsDscomsZsadriankarlensZsbarsDsweztermsZs"
@@ -36,7 +40,9 @@ local user = require "bar.user"
 local spotify = require "bar.spotify"
 local paths = require "bar.paths"
 
--- conforming to https://github.com/wez/wezterm/commit/e4ae8a844d8feaa43e1de34c5cc8b4f07ce525dd
+---conforming to https://github.com/wez/wezterm/commit/e4ae8a844d8feaa43e1de34c5cc8b4f07ce525dd
+---@param c table: wezterm config object
+---@param opts bar.options
 M.apply_to_config = function(c, opts)
   -- make the opts arg optional
   if not opts then

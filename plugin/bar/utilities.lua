@@ -1,16 +1,28 @@
-local H = {}
-
 local wez = require "wezterm"
 
+---@private
+---@class bar.utilities
+local H = {}
+
+---@type string
 H.home = (os.getenv "USERPROFILE" or os.getenv "HOME" or wez.home_dir or ""):gsub("\\", "/")
+
+---@type boolean
 H.is_windows = package.config:sub(1, 1) == "\\"
 
+---waits for a specified throttle time before proceeding.
+---@param throttle number
+---@param last_update number
+---@return boolean
 H._wait = function (throttle, last_update)
   local current_time = os.time()
   return current_time - last_update < throttle
 end
 
--- get basename for dir/file, removing ft and path
+---get basename for dir/file, removing ft and path
+---@param s string
+---@return string?
+---@return number?
 H._basename = function(s)
   if type(s) ~= "string" then
     return nil
@@ -18,7 +30,11 @@ H._basename = function(s)
   return s:gsub("(.*[/\\])(.*)%.(.*)", "%2")
 end
 
--- add spaces to each side of a string
+---add spaces to each side of a string
+---@param s string
+---@param space number
+---@param trailing_space number
+---@return string
 H._space = function(s, space, trailing_space)
   if type(s) ~= "string" or type(space) ~= "number" then
     return ""
@@ -31,12 +47,17 @@ H._space = function(s, space, trailing_space)
   return spaces .. s .. trailing_spaces
 end
 
--- trim string from trailing spaces and newlines
+---trim string from trailing spaces and newlines
+---@param s string
+---@return string
 H._trim = function(s)
   return s:match "^%s*(.-)%s*$"
 end
 
--- merges two tables
+---merges two tables
+---@param t1 table
+---@param t2 table
+---@return table
 function H._merge(t1, t2)
   for k, v in pairs(t2) do
     if type(v) == "table" then
@@ -52,7 +73,10 @@ function H._merge(t1, t2)
   return t1
 end
 
--- return string with spacing adjusted to prev string
+---return string with spacing adjusted to prev string
+---@param prev string
+---@param next string
+---@return string
 H._constant_width = function(prev, next)
   local spacing = #prev - #next
   local first_half = math.floor(spacing / 2)

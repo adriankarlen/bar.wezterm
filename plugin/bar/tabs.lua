@@ -1,7 +1,17 @@
 local utilities = require "bar.utilities"
+
+---@private
+---@class bar.tabs
 local M = {}
 
--- get tab title
+---@class tabs.tabinfo
+---@field tab_title string
+---@field active_pane table
+---@field active_pane.title string
+
+---get tab titletab_info 
+---@param tab_info tabs.tabinfo
+---@return string
 M.get_title = function(tab_info)
   local title = tab_info.tab_title
   -- if the tab title is explicitly set, take that
