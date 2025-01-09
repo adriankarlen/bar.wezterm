@@ -36,7 +36,8 @@ local bar = wezterm.plugin.require("https://github.com/adriankarlen/bar.wezterm"
 bar.apply_to_config(config)
 ```
 
-> NOTE: This assumes that you have imported the wezterm module and initialized the config-object.
+> [!NOTE]
+> This assumes that you have imported the wezterm module and initialized the config-object.
 
 &nbsp;
 
@@ -60,7 +61,8 @@ bar.apply_to_config(
 
 ### 🏭 Default configuration
 
-> NOTE: The default config requires that you are using a Nerd Font or has "Symbols Nerd Font" installed on your system so wezterm can default to it.
+> [!IMPORTANT]
+> The default config requires that you are using a Nerd Font or has "Symbols Nerd Font" installed on your system so wezterm can default to it.
 
 ```lua
 local config = {
