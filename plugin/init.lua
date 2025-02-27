@@ -83,7 +83,7 @@ wez.on("format-tab-title", function(tab, _, _, conf, _, _)
   local palette = conf.resolved_palette
 
   local index = tab.tab_index + 1
-  local offset = #tostring(index) + #options.separator.left_icon + (2 * options.separator.space) + 2
+  local offset = #tostring(index) + (2 * options.separator.space) + 2
   local title = index
     .. utilities._space(options.separator.left_icon, options.separator.space, nil)
     .. tabs.get_title(tab)
