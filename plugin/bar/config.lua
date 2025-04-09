@@ -24,6 +24,9 @@ local M = {}
 ---@field max_width number
 ---@field throttle number
 
+---@class option.clock : option.module
+---@field format string
+
 ---@class option.modules
 ---@field tabs option.tabs
 ---@field workspace option.module
@@ -31,21 +34,33 @@ local M = {}
 ---@field pane option.module
 ---@field username option.module
 ---@field hostname option.module
----@field clock option.module
+---@field clock option.clock
 ---@field cwd option.module
 ---@field spotify option.spotify
+
+---@class option.padding.tabs
+---@field left number
+---@field right number
+
+---@class option.padding : option.padding.tabs
+---@field tabs option.padding.tabs
 
 ---@class bar.options
 ---@field position "top" | "bottom"
 ---@field max_width number
 ---@field separator option.separator
 ---@field modules option.modules
+---@field padding option.padding
 M.options = {
   position = "bottom",
   max_width = 32,
   padding = {
     left = 1,
     right = 1,
+    tabs = {
+      left = 0,
+      right = 2,
+    },
   },
   separator = {
     space = 1,
@@ -68,6 +83,11 @@ M.options = {
       icon = wez.nerdfonts.oct_rocket,
       color = 2,
     },
+    zoom = {
+      enabled = false,
+      icon = wez.nerdfonts.md_fullscreen,
+      color = 4,
+    },
     pane = {
       enabled = true,
       icon = wez.nerdfonts.cod_multiple_windows,
@@ -86,6 +106,7 @@ M.options = {
     clock = {
       enabled = true,
       icon = wez.nerdfonts.md_calendar_clock,
+      format = "%H:%M",
       color = 5,
     },
     cwd = {

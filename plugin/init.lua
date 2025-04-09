@@ -103,7 +103,7 @@ wez.on("format-tab-title", function(tab, _, _, conf, _, _)
   return {
     { Background = { Color = bg } },
     { Foreground = { Color = fg } },
-    { Text = utilities._space(title, 0, 2) },
+    { Text = utilities._space(title, options.padding.left, options.padding.tabs.right) },
   }
 end)
 
@@ -133,6 +133,19 @@ wez.on("update-status", function(window, pane)
 
     table.insert(left_cells, { Foreground = { Color = stat_fg } })
     table.insert(left_cells, { Text = stat })
+  end
+
+  if options.modules.zoom.enabled then
+    local panes_with_info = pane:tab():panes_with_info()
+    for _, p in ipairs(panes_with_info) do
+      if p.is_active and p.is_zoomed then
+        table.insert(left_cells, { Foreground = { Color = palette.ansi[options.modules.zoom.color] } })
+        table.insert(
+          left_cells,
+          { Text = options.modules.zoom.icon .. utilities._space("zoom", options.separator.space) }
+        )
+      end
+    end
   end
 
   if options.modules.pane.enabled then
@@ -177,7 +190,7 @@ wez.on("update-status", function(window, pane)
     {
       name = "clock",
       func = function()
-        return wez.time.now():format "%H:%M"
+        return wez.time.now():format(options.modules.clock.format)
       end,
     },
     {
