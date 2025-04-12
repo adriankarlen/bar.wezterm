@@ -71,6 +71,10 @@ local config = {
   padding = {
     left = 1,
     right = 1,
+    tabs = {
+      left = 0,
+      right = 2,
+    },
   },
   separator = {
     space = 1,
@@ -93,6 +97,11 @@ local config = {
       icon = wez.nerdfonts.oct_rocket,
       color = 2,
     },
+    zoom = {
+      enabled = false,
+      icon = wez.nerdfonts.md_fullscreen,
+      color = 4,
+    },
     pane = {
       enabled = true,
       icon = wez.nerdfonts.cod_multiple_windows,
@@ -111,6 +120,7 @@ local config = {
     clock = {
       enabled = true,
       icon = wez.nerdfonts.md_calendar_clock,
+      format = "%H:%M",
       color = 5,
     },
     cwd = {
