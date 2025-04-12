@@ -103,7 +103,7 @@ wez.on("format-tab-title", function(tab, _, _, conf, _, _)
   return {
     { Background = { Color = bg } },
     { Foreground = { Color = fg } },
-    { Text = utilities._space(title, options.padding.left, options.padding.tabs.right) },
+    { Text = utilities._space(title, options.padding.tabs.left, options.padding.tabs.right) },
   }
 end)
 
