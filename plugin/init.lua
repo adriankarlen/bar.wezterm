@@ -46,6 +46,7 @@ local paths = require "bar.paths"
 M.apply_to_config = function(c, opts)
   -- make the opts arg optional
   if not opts then
+    ---@diagnostic disable-next-line: missing-fields
     opts = {}
   end
 
@@ -67,6 +68,10 @@ M.apply_to_config = function(c, opts)
       inactive_tab = {
         bg_color = "transparent",
         fg_color = scheme.ansi[options.modules.tabs.inactive_tab_fg],
+      },
+      new_tab = {
+        bg_color = "transparent",
+        fg_color = scheme.ansi[options.modules.tabs.new_tab_tab_fg],
       },
     },
   }
