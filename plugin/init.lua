@@ -54,29 +54,29 @@ M.apply_to_config = function(c, opts)
   options = config.extend_options(config.options, opts)
 
   local scheme = wez.color.get_builtin_schemes()[c.color_scheme]
-  if scheme == nil then
-    scheme = wez.color.get_default_colors()
+  if scheme ~= nil then
+    if c.colors ~= nil then
+      scheme = utilities._merge(scheme, c.colors)
+    end
+    local default_colors = {
+      tab_bar = {
+        background = "transparent",
+        active_tab = {
+          bg_color = "transparent",
+          fg_color = scheme.ansi[options.modules.tabs.active_tab_fg],
+        },
+        inactive_tab = {
+          bg_color = "transparent",
+          fg_color = scheme.ansi[options.modules.tabs.inactive_tab_fg],
+        },
+        new_tab = {
+          bg_color = "transparent",
+          fg_color = scheme.ansi[options.modules.tabs.new_tab_fg],
+        },
+      },
+    }
+    c.colors = utilities._merge(default_colors, scheme)
   end
-
-  local default_colors = {
-    tab_bar = {
-      background = "transparent",
-      active_tab = {
-        bg_color = "transparent",
-        fg_color = scheme.ansi[options.modules.tabs.active_tab_fg],
-      },
-      inactive_tab = {
-        bg_color = "transparent",
-        fg_color = scheme.ansi[options.modules.tabs.inactive_tab_fg],
-      },
-      new_tab = {
-        bg_color = "transparent",
-        fg_color = scheme.ansi[options.modules.tabs.new_tab_fg],
-      },
-    },
-  }
-
-  c.colors = utilities._merge(default_colors, scheme)
 
   -- make the plugin own these settings
   c.tab_bar_at_bottom = options.position == "bottom"
