@@ -71,7 +71,7 @@ M.apply_to_config = function(c, opts)
       },
       new_tab = {
         bg_color = "transparent",
-        fg_color = scheme.ansi[options.modules.tabs.new_tab_tab_fg],
+        fg_color = scheme.ansi[options.modules.tabs.new_tab_fg],
       },
     },
   }
