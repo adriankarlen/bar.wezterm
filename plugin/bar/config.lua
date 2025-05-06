@@ -72,6 +72,7 @@ M.options = {
     tabs = {
       active_tab_fg = 4,
       inactive_tab_fg = 6,
+      new_tab_fg = 2,
     },
     workspace = {
       enabled = true,
