@@ -27,7 +27,11 @@ H._basename = function(s)
   if type(s) ~= "string" then
     return nil
   end
-  return s:gsub("(.*[/\\])(.*)%.(.*)", "%2")
+  local name = s:match("[^/\\]*$")  -- match everything after the last / or \
+  if name then
+    return name:gsub("%.%w+$", "")  -- remove extension if present
+  end
+  return nil
 end
 
 ---add spaces to each side of a string
