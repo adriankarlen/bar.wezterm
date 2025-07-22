@@ -29,6 +29,7 @@ local M = {}
 
 ---@class option.modules
 ---@field tabs option.tabs
+---@field mode option.module
 ---@field workspace option.module
 ---@field leader option.module
 ---@field pane option.module
@@ -73,6 +74,11 @@ M.options = {
       active_tab_fg = 4,
       inactive_tab_fg = 6,
       new_tab_fg = 2,
+    },
+    mode = {
+      enabled = true, 
+      icon = wez.nerdfonts.cod_server_process, -- TODO: replace with a more suitable icon
+      color = 1,
     },
     workspace = {
       enabled = true,

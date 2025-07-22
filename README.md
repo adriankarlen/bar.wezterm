@@ -88,6 +88,11 @@ local config = {
       inactive_tab_fg = 6,
       new_tab_fg = 2,
     },
+    mode = {
+      enabled = true,
+      icon = wez.nerdfonts.cod_server_process, --- TODO: don't forget here as well
+      color = 1,
+    },
     workspace = {
       enabled = true,
       icon = wez.nerdfonts.cod_window,
