@@ -1,4 +1,8 @@
+---@private
+---@class bar.mode
+---@field get_mode fun(window: window): string
 local M = {}
+
 
 --- Return active mode
 ---@param window window  
