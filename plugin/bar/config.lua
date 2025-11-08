@@ -19,6 +19,7 @@ local M = {}
 ---@field enabled boolean
 ---@field icon string
 ---@field color number
+---@field weight number
 
 ---@class option.spotify : option.module
 ---@field max_width number
@@ -78,42 +79,50 @@ M.options = {
       enabled = true,
       icon = wez.nerdfonts.cod_window,
       color = 8,
+      weight = 0,
     },
     leader = {
       enabled = true,
       icon = wez.nerdfonts.oct_rocket,
       color = 2,
+      weight = 0,
     },
     zoom = {
       enabled = false,
       icon = wez.nerdfonts.md_fullscreen,
       color = 4,
+      weight = 0,
     },
     pane = {
       enabled = true,
       icon = wez.nerdfonts.cod_multiple_windows,
       color = 7,
+      weight = 0,
     },
     username = {
       enabled = true,
       icon = wez.nerdfonts.fa_user,
       color = 6,
+      weight = 0,
     },
     hostname = {
       enabled = true,
       icon = wez.nerdfonts.cod_server,
       color = 8,
+      weight = 0,
     },
     clock = {
       enabled = true,
       icon = wez.nerdfonts.md_calendar_clock,
       format = "%H:%M",
+      weight = 0,
       color = 5,
     },
     cwd = {
       enabled = true,
       icon = wez.nerdfonts.oct_file_directory,
       color = 7,
+      weight = 0,
     },
     spotify = {
       enabled = false,
@@ -121,6 +130,7 @@ M.options = {
       color = 3,
       max_width = 64,
       throttle = 15,
+      weight = 0,
     },
   },
 }
