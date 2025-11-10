@@ -120,6 +120,17 @@ wez.on("update-status", function(window, pane)
 
   local palette = conf.resolved_palette
 
+  local _order_callbacks = function(a, b)
+    local wa = options.modules[a.name].weight or 0
+    local wb = options.modules[b.name].weight or 0
+
+    if wa ~= wb then
+      return wa < wb
+    end
+
+    return a.name < b.name
+  end
+
   -- left status
   local left_cells = {
     { Background = { Color = palette.tab_bar.background } },
@@ -127,30 +138,42 @@ wez.on("update-status", function(window, pane)
 
   table.insert(left_cells, { Text = string.rep(" ", options.padding.left) })
 
+  local left_callbacks = {}
   if options.modules.workspace.enabled then
-    local stat = options.modules.workspace.icon .. utilities._space(window:active_workspace(), options.separator.space)
-    local stat_fg = palette.ansi[options.modules.workspace.color]
+    table.insert(left_callbacks, {
+      name = "workspace",
+      func = function()
+        local stat = options.modules.workspace.icon
+          .. utilities._space(window:active_workspace(), options.separator.space)
+        local stat_fg = palette.ansi[options.modules.workspace.color]
 
-    if options.modules.leader.enabled and window:leader_is_active() then
-      stat_fg = palette.ansi[options.modules.leader.color]
-      stat = utilities._constant_width(stat, options.modules.leader.icon)
-    end
+        if options.modules.leader.enabled and window:leader_is_active() then
+          stat_fg = palette.ansi[options.modules.leader.color]
+          stat = utilities._constant_width(stat, options.modules.leader.icon)
+        end
 
-    table.insert(left_cells, { Foreground = { Color = stat_fg } })
-    table.insert(left_cells, { Text = stat })
+        table.insert(left_cells, { Foreground = { Color = stat_fg } })
+        table.insert(left_cells, { Text = stat })
+      end,
+    })
   end
 
   if options.modules.zoom.enabled then
-    local panes_with_info = pane:tab():panes_with_info()
-    for _, p in ipairs(panes_with_info) do
-      if p.is_active and p.is_zoomed then
-        table.insert(left_cells, { Foreground = { Color = palette.ansi[options.modules.zoom.color] } })
-        table.insert(
-          left_cells,
-          { Text = options.modules.zoom.icon .. utilities._space("zoom", options.separator.space) }
-        )
-      end
-    end
+    table.insert(left_callbacks, {
+      name = "zoom",
+      func = function()
+        local panes_with_info = pane:tab():panes_with_info()
+        for _, p in ipairs(panes_with_info) do
+          if p.is_active and p.is_zoomed then
+            table.insert(left_cells, { Foreground = { Color = palette.ansi[options.modules.zoom.color] } })
+            table.insert(
+              left_cells,
+              { Text = options.modules.zoom.icon .. utilities._space("zoom", options.separator.space) }
+            )
+          end
+        end
+      end,
+    })
   end
 
   if options.modules.pane.enabled then
@@ -158,11 +181,21 @@ wez.on("update-status", function(window, pane)
     if not process then
       goto set_left_status
     end
-    table.insert(left_cells, { Foreground = { Color = palette.ansi[options.modules.pane.color] } })
-    table.insert(
-      left_cells,
-      { Text = options.modules.pane.icon .. utilities._space(utilities._basename(process), options.separator.space) }
-    )
+
+    table.insert(left_callbacks, {
+      name = "pane",
+      func = function()
+        table.insert(left_cells, { Foreground = { Color = palette.ansi[options.modules.pane.color] } })
+        table.insert(left_cells, {
+          Text = options.modules.pane.icon .. utilities._space(utilities._basename(process), options.separator.space),
+        })
+      end,
+    })
+  end
+
+  table.sort(left_callbacks, _order_callbacks)
+  for _, c in ipairs(left_callbacks) do
+    c.func()
   end
 
   ::set_left_status::
@@ -173,7 +206,7 @@ wez.on("update-status", function(window, pane)
     { Background = { Color = palette.tab_bar.background } },
   }
 
-  local callbacks = {
+  local right_callbacks = {
     {
       name = "spotify",
       func = function()
@@ -206,7 +239,8 @@ wez.on("update-status", function(window, pane)
     },
   }
 
-  for _, callback in ipairs(callbacks) do
+  table.sort(right_callbacks, _order_callbacks)
+  for _, callback in ipairs(right_callbacks) do
     local name = callback.name
     local func = callback.func
     if not options.modules[name].enabled then
