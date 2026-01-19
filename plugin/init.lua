@@ -140,7 +140,7 @@ wez.on("update-status", function(window, pane)
     table.insert(left_cells, { Text = stat })
   end
 
-  if options.modules.zoom.enabled then
+  if options.modules.zoom.enabled and pane:tab() then
     local panes_with_info = pane:tab():panes_with_info()
     for _, p in ipairs(panes_with_info) do
       if p.is_active and p.is_zoomed then
