@@ -29,7 +29,7 @@ H._basename = function(s)
   end
   local name = s:match("[^/\\]*$")  -- match everything after the last / or \
   if name then
-    return name:gsub("%.%w+$", "")  -- remove extension if present
+    return name:gsub("(.+)%.%w+$", "%1")  -- remove extension if present, but preserve leading dots
   end
   return nil
 end
