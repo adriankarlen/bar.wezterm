@@ -11,8 +11,8 @@ local plugin_dir = wez.plugin.list()[1].plugin_dir:gsub(separator .. "[^" .. sep
 ---@param path string
 ---@return boolean
 local function directory_exists(path)
-  local success, result = pcall(wez.read_dir, plugin_dir .. path)
-  return success and result
+  local success = pcall(wez.read_dir, plugin_dir .. path)
+  return success
 end
 
 ---returns the name of the package, used when requiring modules
@@ -128,7 +128,8 @@ wez.on("update-status", function(window, pane)
   table.insert(left_cells, { Text = string.rep(" ", options.padding.left) })
 
   if options.modules.workspace.enabled then
-    local stat = options.modules.workspace.icon .. utilities._space(window:active_workspace(), options.separator.space)
+    local stat = options.modules.workspace.icon
+      .. utilities._space(window:active_workspace(), options.separator.space, nil)
     local stat_fg = palette.ansi[options.modules.workspace.color]
 
     if options.modules.leader.enabled and window:leader_is_active() then
@@ -159,10 +160,9 @@ wez.on("update-status", function(window, pane)
       goto set_left_status
     end
     table.insert(left_cells, { Foreground = { Color = palette.ansi[options.modules.pane.color] } })
-    table.insert(
-      left_cells,
-      { Text = options.modules.pane.icon .. utilities._space(utilities._basename(process), options.separator.space) }
-    )
+    table.insert(left_cells, {
+      Text = options.modules.pane.icon .. utilities._space(utilities._basename(process) or "", options.separator.space),
+    })
   end
 
   ::set_left_status::

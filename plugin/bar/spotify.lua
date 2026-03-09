@@ -10,7 +10,7 @@ local stored_playback = ""
 
 ---format spotify playback, to handle max_width nicely
 ---@param pb string
----@param max_width number
+---@param max_width integer
 ---@return string
 local format_playback = function(pb, max_width)
   if #pb <= max_width then
@@ -19,6 +19,8 @@ local format_playback = function(pb, max_width)
 
   -- split on " - "
   local artist, track = pb:match "^(.-) %- (.+)$"
+  artist = artist or ""
+  track = track or ""
   -- get artist before first ","
   local pb_main_artist = artist:match "([^,]+)" .. " - " .. track
   if #pb_main_artist <= max_width then
@@ -30,8 +32,8 @@ local format_playback = function(pb, max_width)
 end
 
 ---gets the currently playing song from spotify
----@param max_width number
----@param throttle number
+---@param max_width integer
+---@param throttle integer
 ---@return string
 M.get_currently_playing = function(max_width, throttle)
   if utilities._wait(throttle, last_update) then
@@ -43,7 +45,8 @@ M.get_currently_playing = function(max_width, throttle)
     wez.log_error(stderr)
     return ""
   end
-  local res = format_playback(utilities._trim(pb), max_width)
+
+  local res = format_playback(utilities._trim(pb) or "", max_width)
   stored_playback = res
   last_update = os.time()
 

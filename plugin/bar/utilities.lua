@@ -11,10 +11,10 @@ H.home = (os.getenv "USERPROFILE" or os.getenv "HOME" or wez.home_dir or ""):gsu
 H.is_windows = package.config:sub(1, 1) == "\\"
 
 ---waits for a specified throttle time before proceeding.
----@param throttle number
----@param last_update number
+---@param throttle integer
+---@param last_update integer
 ---@return boolean
-H._wait = function (throttle, last_update)
+H._wait = function(throttle, last_update)
   local current_time = os.time()
   return current_time - last_update < throttle
 end
@@ -22,22 +22,22 @@ end
 ---get basename for dir/file, removing ft and path
 ---@param s string
 ---@return string?
----@return number?
+---@return integer?
 H._basename = function(s)
   if type(s) ~= "string" then
     return nil
   end
-  local name = s:match("[^/\\]*$")  -- match everything after the last / or \
+  local name = s:match "[^/\\]*$" -- match everything after the last / or \
   if name then
-    return name:gsub("(.+)%.%w+$", "%1")  -- remove extension if present, but preserve leading dots
+    return name:gsub("(.+)%.%w+$", "%1") -- remove extension if present, but preserve leading dots
   end
   return nil
 end
 
 ---add spaces to each side of a string
 ---@param s string
----@param space number
----@param trailing_space number
+---@param space integer
+---@param trailing_space integer|nil
 ---@return string
 H._space = function(s, space, trailing_space)
   if type(s) ~= "string" or type(space) ~= "number" then
@@ -53,7 +53,7 @@ end
 
 ---trim string from trailing spaces and newlines
 ---@param s string
----@return string
+---@return string?
 H._trim = function(s)
   return s:match "^%s*(.-)%s*$"
 end

@@ -9,9 +9,10 @@ local M = {}
 ---@field active_pane table
 ---@field active_pane.title string
 
----get tab titletab_info 
+---get tab titletab_info
 ---@param tab_info tabs.tabinfo
----@return string
+---@return string?
+---@return integer?
 M.get_title = function(tab_info)
   local title = tab_info.tab_title
   -- if the tab title is explicitly set, take that

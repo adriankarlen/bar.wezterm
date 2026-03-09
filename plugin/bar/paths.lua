@@ -14,12 +14,12 @@ local find_git_dir = function(directory)
     local handle = io.open(directory .. "/.git/HEAD", "r")
     if handle then
       handle:close()
-      directory = directory:match "([^/]+)$"
+      directory = directory:match "([^/]+)$" or ""
       return directory
     elseif directory == "/" or directory == "" then
       break
     else
-      directory = directory:match "(.+)/[^/]*"
+      directory = directory:match "(.+)/[^/]*" or ""
     end
   end
 
@@ -48,7 +48,11 @@ M.get_cwd = function(pane, search_git_root_instead)
       if slash then
         -- and extract the cwd from the uri, decoding %-encoding
         cwd = cwd_uri:sub(slash):gsub("%%(%x%x)", function(hex)
-          return string.char(tonumber(hex, 16))
+          local hex_num = tonumber(hex, 16)
+          if not hex_num then
+            return "-"
+          end
+          return string.char(hex_num)
         end)
       end
     end
