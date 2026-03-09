@@ -4,6 +4,29 @@ local wez = require "wezterm"
 local M = {}
 local options = {}
 
+---builds tab_bar colors block from a resolved color scheme
+---@param scheme table
+---@return table
+local function build_tab_bar_colors(scheme)
+  return {
+    tab_bar = {
+      background = "transparent",
+      active_tab = {
+        bg_color = "transparent",
+        fg_color = scheme.ansi[options.modules.tabs.active_tab_fg],
+      },
+      inactive_tab = {
+        bg_color = "transparent",
+        fg_color = scheme.ansi[options.modules.tabs.inactive_tab_fg],
+      },
+      new_tab = {
+        bg_color = "transparent",
+        fg_color = scheme.ansi[options.modules.tabs.new_tab_fg],
+      },
+    },
+  }
+end
+
 local separator = package.config:sub(1, 1) == "\\" and "\\" or "/"
 local plugin_dir = wez.plugin.list()[1].plugin_dir:gsub(separator .. "[^" .. separator .. "]*$", "")
 
@@ -58,24 +81,7 @@ M.apply_to_config = function(c, opts)
     if c.colors ~= nil then
       scheme = utilities._merge(scheme, c.colors)
     end
-    local default_colors = {
-      tab_bar = {
-        background = "transparent",
-        active_tab = {
-          bg_color = "transparent",
-          fg_color = scheme.ansi[options.modules.tabs.active_tab_fg],
-        },
-        inactive_tab = {
-          bg_color = "transparent",
-          fg_color = scheme.ansi[options.modules.tabs.inactive_tab_fg],
-        },
-        new_tab = {
-          bg_color = "transparent",
-          fg_color = scheme.ansi[options.modules.tabs.new_tab_fg],
-        },
-      },
-    }
-    c.colors = utilities._merge(default_colors, scheme)
+    c.colors = utilities._merge(build_tab_bar_colors(scheme), scheme)
   end
 
   -- make the plugin own these settings
@@ -230,6 +236,38 @@ wez.on("update-status", function(window, pane)
   table.insert(right_cells, { Text = string.rep(" ", options.padding.right) })
 
   window:set_right_status(wez.format(right_cells))
+end)
+
+wez.on("window-config-reloaded", function(window, _)
+  local present, conf = pcall(window.effective_config, window)
+  if not present then
+    return
+  end
+
+  local scheme = wez.color.get_builtin_schemes()[conf.color_scheme]
+  if not scheme then
+    return
+  end
+
+  local new_tab_bar = build_tab_bar_colors(scheme)
+  local overrides = window:get_config_overrides() or {}
+  local current = overrides.colors and overrides.colors.tab_bar
+
+  if
+    current
+    and current.active_tab
+    and current.active_tab.fg_color == new_tab_bar.tab_bar.active_tab.fg_color
+    and current.inactive_tab
+    and current.inactive_tab.fg_color == new_tab_bar.tab_bar.inactive_tab.fg_color
+    and current.new_tab
+    and current.new_tab.fg_color == new_tab_bar.tab_bar.new_tab.fg_color
+  then
+    return
+  end
+
+  overrides.colors = overrides.colors or {}
+  overrides.colors.tab_bar = new_tab_bar.tab_bar
+  window:set_config_overrides(overrides)
 end)
 
 return M
