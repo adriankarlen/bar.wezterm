@@ -17,6 +17,9 @@ A tab bar configuration for wezterm, this configuration is heavily inspired by [
 
 ## 📋 Prerequisites
 
+> [!IMPORTANT]
+> The plugin will not work if `config.enable_tab_bar` is set to `false`. Make sure the tab bar is enabled (this is the default wezterm behavior, so you only need to act if you have explicitly disabled it).
+
 ### 🎵Spotify
 
 In order for the spotify integration to work you need to have [spotify-tui](https://github.com/Rigellute/spotify-tui) installed on you system. Follow their installation instructions on how to set it up.
