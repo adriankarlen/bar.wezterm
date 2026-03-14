@@ -81,7 +81,9 @@ M.apply_to_config = function(c, opts)
     if c.colors ~= nil then
       scheme = utilities._merge(scheme, c.colors)
     end
-    c.colors = utilities._merge(build_tab_bar_colors(scheme), scheme)
+    local tab_bar_colors = build_tab_bar_colors(scheme)
+    c.colors = c.colors or {}
+    c.colors.tab_bar = tab_bar_colors.tab_bar
   end
 
   -- make the plugin own these settings
