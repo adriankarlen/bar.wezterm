@@ -78,12 +78,9 @@ M.apply_to_config = function(c, opts)
 
   local scheme = wez.color.get_builtin_schemes()[c.color_scheme]
   if scheme ~= nil then
-    if c.colors ~= nil then
-      scheme = utilities._merge(scheme, c.colors)
-    end
-    local tab_bar_colors = build_tab_bar_colors(scheme)
+    local bar_colors = build_tab_bar_colors(scheme)
     c.colors = c.colors or {}
-    c.colors.tab_bar = tab_bar_colors.tab_bar
+    c.colors.tab_bar = utilities._merge(c.colors.tab_bar or {}, bar_colors.tab_bar)
   end
 
   -- make the plugin own these settings
@@ -267,8 +264,12 @@ wez.on("window-config-reloaded", function(window, _)
     return
   end
 
-  overrides.colors = overrides.colors or {}
-  overrides.colors.tab_bar = new_tab_bar.tab_bar
+  -- Preserve full resolved palette (cursor_bg, split, selection_bg, etc.) and only
+  -- update tab_bar. Setting overrides.colors = { tab_bar = ... } alone would replace
+  -- the entire palette and drop user overrides.
+  local full_colors = utilities._merge({}, conf.resolved_palette or {})
+  full_colors.tab_bar = new_tab_bar.tab_bar
+  overrides.colors = full_colors
   window:set_config_overrides(overrides)
 end)
 
