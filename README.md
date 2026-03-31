@@ -88,8 +88,11 @@ local config = {
   modules = {
     tabs = {
       active_tab_fg = 4,
+      active_tab_bg = "transparent",
       inactive_tab_fg = 6,
+      inactive_tab_bg = "transparent",
       new_tab_fg = 2,
+      new_tab_bg = "transparent",
     },
     workspace = {
       enabled = true,
@@ -146,30 +149,34 @@ local config = {
 ### 🎨 Colors
 
 Every ansi color used is configurable, to change a color, pass in the desired
-ansi code to use for a specific setting.
+ansi code to use for a specific setting. You can use either an ansi color index
+(number) or a hex color string (e.g., `"#c6a0f6"`).
 
-If you want to change any other color used, since the plugin uses your themes colors you can configure the theme to get a different result. For instance, if I want to change the active tab background color I can do so like this:
+Tab background colors can be configured via the `modules.tabs` options:
 
 ```lua
-return {
-  -- ... your existing config
-  colors = {
-    tab_bar = {
-      active_tab = {
-        bg_color = "#26233a"
-      }
-    }
-  }
-}
+bar.apply_to_config(config, {
+  modules = {
+    tabs = {
+      active_tab_fg = 1,
+      active_tab_bg = 6,           -- ansi color index
+      -- or use a hex color:
+      -- active_tab_bg = "#c6a0f6",
+    },
+  },
+})
 ```
 
 #### 🖌️ Color table
 
-| Color option                    | Default       |
-| ------------------------------- | ------------- |
-| `tab_bar.background`            | `transparent` |
-| `tab_bar.active_tab.bg_color`   | `transparent` |
-| `tab_bar.inactive_tab.bg_color` | `transparent` |
+| Config option       | Default       |
+| ------------------- | ------------- |
+| `active_tab_fg`     | `4`           |
+| `active_tab_bg`     | `transparent` |
+| `inactive_tab_fg`   | `6`           |
+| `inactive_tab_bg`   | `transparent` |
+| `new_tab_fg`        | `2`           |
+| `new_tab_bg`        | `transparent` |
 
 ## 📜 License
 

@@ -4,24 +4,38 @@ local wez = require "wezterm"
 local M = {}
 local options = {}
 
+---resolves a color option: if it is a number use it as an ansi index,
+---otherwise treat it as a color string
+---@param value string|number|nil
+---@param scheme table
+---@param fallback string
+---@return string
+local function resolve_color(value, scheme, fallback)
+  if type(value) == "number" then
+    return scheme.ansi[value] or fallback
+  end
+  return value or fallback
+end
+
 ---builds tab_bar colors block from a resolved color scheme
 ---@param scheme table
 ---@return table
 local function build_tab_bar_colors(scheme)
+  local tabs = options.modules.tabs
   return {
     tab_bar = {
       background = "transparent",
       active_tab = {
-        bg_color = "transparent",
-        fg_color = scheme.ansi[options.modules.tabs.active_tab_fg],
+        bg_color = resolve_color(tabs.active_tab_bg, scheme, "transparent"),
+        fg_color = resolve_color(tabs.active_tab_fg, scheme, "white"),
       },
       inactive_tab = {
-        bg_color = "transparent",
-        fg_color = scheme.ansi[options.modules.tabs.inactive_tab_fg],
+        bg_color = resolve_color(tabs.inactive_tab_bg, scheme, "transparent"),
+        fg_color = resolve_color(tabs.inactive_tab_fg, scheme, "white"),
       },
       new_tab = {
-        bg_color = "transparent",
-        fg_color = scheme.ansi[options.modules.tabs.new_tab_fg],
+        bg_color = resolve_color(tabs.new_tab_bg, scheme, "transparent"),
+        fg_color = resolve_color(tabs.new_tab_fg, scheme, "white"),
       },
     },
   }
