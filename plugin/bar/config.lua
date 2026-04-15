@@ -40,6 +40,7 @@ local M = {}
 ---@field hostname option.module
 ---@field clock option.clock
 ---@field cwd option.module
+---@field ssh option.module
 ---@field spotify option.spotify
 
 ---@class option.padding.tabs
@@ -121,6 +122,11 @@ M.options = {
       enabled = true,
       icon = wez.nerdfonts.oct_file_directory,
       color = 7,
+    },
+    ssh = {
+      enabled = false,
+      icon = wez.nerdfonts.md_ssh,
+      color = 5,
     },
     spotify = {
       enabled = false,

@@ -220,7 +220,26 @@ wez.on("update-status", function(window, pane)
     {
       name = "cwd",
       func = function()
+        if options.modules.ssh.enabled then
+          local process = pane:get_foreground_process_name()
+          if process and (utilities._basename(process) or ""):match "ssh$" then
+            return ""
+          end
+        end
         return paths.get_cwd(pane, true)
+      end,
+    },
+    {
+      name = "ssh",
+      func = function()
+        local process = pane:get_foreground_process_name()
+        if not process then
+          return ""
+        end
+        if (utilities._basename(process) or ""):match "ssh$" then
+          return "ssh"
+        end
+        return ""
       end,
     },
   }

@@ -20,6 +20,14 @@ A tab bar configuration for wezterm, this configuration is heavily inspired by [
 > [!IMPORTANT]
 > The plugin will not work if `config.enable_tab_bar` is set to `false`. Make sure the tab bar is enabled (this is the default wezterm behavior, so you only need to act if you have explicitly disabled it).
 
+### 🔐 SSH
+
+The SSH module detects when the active pane is running an SSH session and displays an indicator in the right status bar. When enabled, it automatically hides the `cwd` module during SSH sessions, since the remote working directory is not available to WezTerm without OSC 7 configuration on the remote host.
+
+> [!NOTE]
+> bar.wezterm ships with this module disabled, please check example in
+> [Configuration](#%EF%B8%8F-configuration) on how to enable it.
+
 ### 🎵Spotify
 
 In order for the spotify integration to work you need to have [spotify-tui](https://github.com/Rigellute/spotify-tui) installed on you system. Follow their installation instructions on how to set it up.
@@ -134,6 +142,11 @@ local config = {
       enabled = true,
       icon = wez.nerdfonts.oct_file_directory,
       color = 7,
+    },
+    ssh = {
+      enabled = false,
+      icon = wez.nerdfonts.md_ssh,
+      color = 5,
     },
     spotify = {
       enabled = false,
