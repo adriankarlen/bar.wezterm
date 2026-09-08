@@ -5,7 +5,9 @@ local M = {}
 local options = {}
 
 ---resolves a color option: if it is a number use it as an ansi index,
----otherwise treat it as a color string
+---otherwise treat it as a color string. resolve_rule_color below is a
+---deliberately stricter sibling used on the rule-drawing path; the two are
+---not interchangeable and must not be merged.
 ---@param value string|number|nil
 ---@param scheme table
 ---@param fallback string
@@ -15,6 +17,23 @@ local function resolve_color(value, scheme, fallback)
     return scheme.ansi[value] or fallback
   end
   return value or fallback
+end
+
+---resolves a rule's color against the palette in force while drawing.
+---a number is an ansi index, a string is a literal color, anything else
+---or an index the scheme does not define falls back to the base color.
+---@param value string|number|nil
+---@param palette table
+---@param fallback string
+---@return string
+local function resolve_rule_color(value, palette, fallback)
+  if type(value) == "number" then
+    return palette.ansi[value] or fallback
+  end
+  if type(value) == "string" then
+    return value
+  end
+  return fallback
 end
 
 ---builds tab_bar colors block from a resolved color scheme
@@ -72,6 +91,7 @@ package.path = package.path
 
 local utilities = require "bar.utilities"
 local config = require "bar.config"
+local rules = require "bar.rules"
 local tabs = require "bar.tabs"
 local user = require "bar.user"
 local spotify = require "bar.spotify"
@@ -106,22 +126,39 @@ end
 wez.on("format-tab-title", function(tab, _, _, conf, _, _)
   local palette = conf.resolved_palette
 
+  local tab_options = type(options.modules) == "table" and options.modules.tabs or nil
+  local tab_rules = type(tab_options) == "table" and tab_options.rules or nil
+
+  local context = { domain = tab.active_pane and tab.active_pane.domain_name }
+
+  -- current_working_dir is one of the two documented cost-bearing fields on
+  -- this object, so it is read only when a rule actually tests it
+  if rules.uses(tab_rules, "cwd") and tab.active_pane then
+    context.cwd = rules.extract_path(tab.active_pane.current_working_dir)
+  end
+
+  local overrides = rules.resolve(tab_rules, context)
+
+  -- a rule's icon replaces the separator glyph; the offset must be built
+  -- from whichever glyph this tab actually renders, not the configured one
+  local icon = overrides.icon or options.separator.left_icon
+
   local index = tab.tab_index + 1
-  local offset = #tostring(index) + #options.separator.left_icon + (2 * options.separator.space) + 2
-  local title = index
-    .. utilities._space(options.separator.left_icon, options.separator.space, nil)
-    .. tabs.get_title(tab)
+  local offset = #tostring(index) + #icon + (2 * options.separator.space) + 2
+  local title = index .. utilities._space(icon, options.separator.space, nil) .. tabs.get_title(tab)
 
   local width = conf.tab_max_width - offset
   if #title > conf.tab_max_width then
     title = wez.truncate_right(title, width) .. "…"
   end
 
-  local fg = palette.tab_bar.inactive_tab.fg_color
-  local bg = palette.tab_bar.inactive_tab.bg_color
+  local fg, bg
   if tab.is_active then
-    fg = palette.tab_bar.active_tab.fg_color
-    bg = palette.tab_bar.active_tab.bg_color
+    fg = resolve_rule_color(overrides.active_tab_fg, palette, palette.tab_bar.active_tab.fg_color)
+    bg = resolve_rule_color(overrides.active_tab_bg, palette, palette.tab_bar.active_tab.bg_color)
+  else
+    fg = resolve_rule_color(overrides.inactive_tab_fg, palette, palette.tab_bar.inactive_tab.fg_color)
+    bg = resolve_rule_color(overrides.inactive_tab_bg, palette, palette.tab_bar.inactive_tab.bg_color)
   end
 
   return {
