@@ -101,6 +101,7 @@ local config = {
       inactive_tab_bg = "transparent",
       new_tab_fg = 2,
       new_tab_bg = "transparent",
+      rules = {},
     },
     workspace = {
       enabled = true,
@@ -190,6 +191,53 @@ bar.apply_to_config(config, {
 | `inactive_tab_bg`   | `transparent` |
 | `new_tab_fg`        | `2`           |
 | `new_tab_bg`        | `transparent` |
+
+### 🎯 Dynamic tab customization rules
+
+You can override tab's color and icon based on its domain and active pane's directory:
+
+```lua
+bar.apply_to_config(config, {
+  modules = {
+    tabs = {
+      rules = {
+        {
+          -- check domain name; requires exact, case-sensitive matchs
+          domain = "WSL:Ubuntu",
+          -- you can override tab's color or icon
+          active_tab_fg = 3,
+          inactive_tab_fg = 3
+        },
+        {
+          -- check domain name using pattern (see lua's string.match)
+          domain = { pattern = "^SSH" },
+          active_tab_fg = 1,
+          inactive_tab_fg = 1,
+          icon = wez.nerdfonts.md_ssh
+        },
+        {
+          -- check domain name using a custom predicate
+          domain = function(name) return name:find "prod" ~= nil end,
+          active_tab_bg = "#eb6f92",
+          inactive_tab_bg = "#eb6f92"
+        },
+        {
+          -- check cwd, same syntax as with domain names
+          cwd = { pattern = "^/home/pet-projects/" },
+          -- when cwd and domain are given at the same time, both should match
+          domain = "local",
+          active_tab_fg = 6,
+          inactive_tab_fg = 6
+        },
+      },
+    },
+  },
+})
+```
+
+Rules are evaluated in list order. Each matching rule overrides the properties it
+names. For example, domain `SSH:prod-01` will be matched by two rules from above;
+first will set tab's icon and foreground, second will override foreground only.
 
 ## 📜 License
 
