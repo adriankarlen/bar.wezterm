@@ -162,11 +162,24 @@ local config = {
 
 ### 🎨 Colors
 
-Every ansi color used is configurable, to change a color, pass in the desired
-ansi code to use for a specific setting. You can use either an ansi color index
-(number) or a hex color string (e.g., `"#c6a0f6"`).
+Every color used is configurable. Pass either an ansi color index (number) or a
+color string — a hex value such as `"#c6a0f6"`, or `"transparent"`.
 
-Tab background colors can be configured via the `modules.tabs` options:
+Indices `1`–`8` select the scheme's normal ansi colors and `9`–`16` their bright
+counterparts, so a bright color is always its normal index plus 8:
+
+| Index | Color   | Bright index |
+| ----- | ------- | ------------ |
+| `1`   | black   | `9`          |
+| `2`   | red     | `10`         |
+| `3`   | green   | `11`         |
+| `4`   | yellow  | `12`         |
+| `5`   | blue    | `13`         |
+| `6`   | magenta | `14`         |
+| `7`   | cyan    | `15`         |
+| `8`   | white   | `16`         |
+
+Tab colors can be configured via the `modules.tabs` options:
 
 ```lua
 bar.apply_to_config(config, {
@@ -174,6 +187,7 @@ bar.apply_to_config(config, {
     tabs = {
       active_tab_fg = 1,
       active_tab_bg = 6,           -- ansi color index
+      inactive_tab_fg = 14,        -- bright magenta
       -- or use a hex color:
       -- active_tab_bg = "#c6a0f6",
     },

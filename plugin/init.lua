@@ -4,7 +4,20 @@ local wez = require "wezterm"
 local M = {}
 local options = {}
 
----resolves a color option: if it is a number use it as an ansi index,
+---looks up an ansi index in a palette. indices 1-8 select the normal colors
+---and 9-16 their bright counterparts, so a bright color is its base plus 8.
+---returns nil for an index the palette does not define.
+---@param index number
+---@param palette table
+---@return string|nil
+local function ansi_color(index, palette)
+  if index > 8 then
+    return palette.brights and palette.brights[index - 8]
+  end
+  return palette.ansi and palette.ansi[index]
+end
+
+---resolves a color option: a number is an ansi index as ansi_color reads it,
 ---otherwise treat it as a color string. resolve_rule_color below is a
 ---deliberately stricter sibling used on the rule-drawing path; the two are
 ---not interchangeable and must not be merged.
@@ -14,7 +27,7 @@ local options = {}
 ---@return string
 local function resolve_color(value, scheme, fallback)
   if type(value) == "number" then
-    return scheme.ansi[value] or fallback
+    return ansi_color(value, scheme) or fallback
   end
   return value or fallback
 end
@@ -28,7 +41,7 @@ end
 ---@return string
 local function resolve_rule_color(value, palette, fallback)
   if type(value) == "number" then
-    return palette.ansi[value] or fallback
+    return ansi_color(value, palette) or fallback
   end
   if type(value) == "string" then
     return value
@@ -232,10 +245,10 @@ wez.on("update-status", function(window, pane)
   if options.modules.workspace.enabled then
     local stat = options.modules.workspace.icon
       .. utilities._space(window:active_workspace(), options.separator.space, nil)
-    local stat_fg = palette.ansi[options.modules.workspace.color]
+    local stat_fg = resolve_color(options.modules.workspace.color, palette, palette.foreground)
 
     if options.modules.leader.enabled and window:leader_is_active() then
-      stat_fg = palette.ansi[options.modules.leader.color]
+      stat_fg = resolve_color(options.modules.leader.color, palette, palette.foreground)
       stat = utilities._constant_width(stat, options.modules.leader.icon)
     end
 
@@ -247,7 +260,10 @@ wez.on("update-status", function(window, pane)
     local panes_with_info = pane:tab():panes_with_info()
     for _, p in ipairs(panes_with_info) do
       if p.is_active and p.is_zoomed then
-        table.insert(left_cells, { Foreground = { Color = palette.ansi[options.modules.zoom.color] } })
+        table.insert(
+          left_cells,
+          { Foreground = { Color = resolve_color(options.modules.zoom.color, palette, palette.foreground) } }
+        )
         table.insert(
           left_cells,
           { Text = options.modules.zoom.icon .. utilities._space("zoom", options.separator.space) }
@@ -261,7 +277,10 @@ wez.on("update-status", function(window, pane)
     if not process then
       goto set_left_status
     end
-    table.insert(left_cells, { Foreground = { Color = palette.ansi[options.modules.pane.color] } })
+    table.insert(
+      left_cells,
+      { Foreground = { Color = resolve_color(options.modules.pane.color, palette, palette.foreground) } }
+    )
     table.insert(left_cells, {
       Text = options.modules.pane.icon .. utilities._space(utilities._basename(process) or "", options.separator.space),
     })
@@ -335,7 +354,10 @@ wez.on("update-status", function(window, pane)
     end
     local text = func()
     if #text > 0 then
-      table.insert(right_cells, { Foreground = { Color = palette.ansi[options.modules[name].color] } })
+      table.insert(
+        right_cells,
+        { Foreground = { Color = resolve_color(options.modules[name].color, palette, palette.foreground) } }
+      )
       table.insert(right_cells, { Text = text })
       table.insert(right_cells, { Foreground = { Color = palette.brights[1] } })
       table.insert(right_cells, {
