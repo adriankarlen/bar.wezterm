@@ -97,6 +97,55 @@ local user = require "bar.user"
 local spotify = require "bar.spotify"
 local paths = require "bar.paths"
 
+---finds the palette to read tab colors from. a config may name a builtin
+---scheme, name one it defines itself, name none at all, or set colors without
+---naming anything; every one of those has to end up with a palette, because a
+---config left without colors.tab_bar leaves the handlers below with no colors
+---to draw from at all.
+---@param c table: wezterm config object
+---@return table
+local function resolve_scheme(c)
+  local named = c.color_scheme
+  local scheme = named and wez.color.get_builtin_schemes()[named]
+    or named and type(c.color_schemes) == "table" and c.color_schemes[named]
+    or wez.color.get_default_colors()
+
+  -- colors set alongside a scheme win over it, the same way wezterm resolves them
+  if type(c.colors) == "table" then
+    return utilities._merge(utilities._merge({}, scheme), c.colors)
+  end
+
+  return scheme
+end
+
+---the palette the event handlers draw from. wezterm fills resolved_palette only
+---with colors the config actually sets, so a config that names no scheme and
+---sets no colors arrives here with no ansi, no brights and no foreground at
+---all; the gaps are filled from the same scheme apply_to_config resolved.
+---@param conf table: the window's effective config
+---@return table
+local function effective_palette(conf)
+  local palette = type(conf.resolved_palette) == "table" and conf.resolved_palette or {}
+
+  if
+    type(palette.ansi) == "table"
+    and type(palette.brights) == "table"
+    and type(palette.tab_bar) == "table"
+    and palette.foreground
+    and palette.background
+  then
+    return palette
+  end
+
+  local scheme = resolve_scheme(conf)
+  local filled = utilities._merge(utilities._merge({}, scheme), palette)
+  if type(filled.tab_bar) ~= "table" then
+    filled.tab_bar = build_tab_bar_colors(scheme).tab_bar
+  end
+
+  return filled
+end
+
 ---conforming to https://github.com/wez/wezterm/commit/e4ae8a844d8feaa43e1de34c5cc8b4f07ce525dd
 ---@param c table: wezterm config object
 ---@param opts bar.options
@@ -110,12 +159,9 @@ M.apply_to_config = function(c, opts)
   -- combine user config with defaults
   options = config.extend_options(config.options, opts)
 
-  local scheme = wez.color.get_builtin_schemes()[c.color_scheme]
-  if scheme ~= nil then
-    local bar_colors = build_tab_bar_colors(scheme)
-    c.colors = c.colors or {}
-    c.colors.tab_bar = utilities._merge(c.colors.tab_bar or {}, bar_colors.tab_bar)
-  end
+  local bar_colors = build_tab_bar_colors(resolve_scheme(c))
+  c.colors = c.colors or {}
+  c.colors.tab_bar = utilities._merge(c.colors.tab_bar or {}, bar_colors.tab_bar)
 
   -- make the plugin own these settings
   c.tab_bar_at_bottom = options.position == "bottom"
@@ -124,7 +170,7 @@ M.apply_to_config = function(c, opts)
 end
 
 wez.on("format-tab-title", function(tab, _, _, conf, _, _)
-  local palette = conf.resolved_palette
+  local palette = effective_palette(conf)
 
   local tab_options = type(options.modules) == "table" and options.modules.tabs or nil
   local tab_rules = type(tab_options) == "table" and tab_options.rules or nil
@@ -174,7 +220,7 @@ wez.on("update-status", function(window, pane)
     return
   end
 
-  local palette = conf.resolved_palette
+  local palette = effective_palette(conf)
 
   -- left status
   local left_cells = {
@@ -313,9 +359,11 @@ wez.on("window-config-reloaded", function(window, _)
     return
   end
 
-  local scheme = wez.color.get_builtin_schemes()[conf.color_scheme]
-  if not scheme then
-    return
+  -- the window's own palette is what it actually draws with, so prefer it and
+  -- fall back to the same resolution apply_to_config used
+  local scheme = conf.resolved_palette
+  if type(scheme) ~= "table" or type(scheme.ansi) ~= "table" then
+    scheme = resolve_scheme(conf)
   end
 
   local new_tab_bar = build_tab_bar_colors(scheme)
