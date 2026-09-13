@@ -163,7 +163,8 @@ local config = {
 ### 🎨 Colors
 
 Every color used is configurable. Pass either an ansi color index (number) or a
-color string — a hex value such as `"#c6a0f6"`, or `"transparent"`.
+color string — a hex value such as `"#c6a0f6"`, `"transparent"`, or the keywords
+`"background"` and `"foreground"` to take the scheme's own.
 
 Indices `1`–`8` select the scheme's normal ansi colors and `9`–`16` their bright
 counterparts, so a bright color is always its normal index plus 8:

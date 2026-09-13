@@ -18,7 +18,8 @@ local function ansi_color(index, palette)
 end
 
 ---resolves a color option: a number is an ansi index as ansi_color reads it,
----otherwise treat it as a color string. resolve_rule_color below is a
+---the keywords "background" and "foreground" take the scheme's own, and
+---anything else is treated as a color string. resolve_rule_color below is a
 ---deliberately stricter sibling used on the rule-drawing path; the two are
 ---not interchangeable and must not be merged.
 ---@param value string|number|nil
@@ -28,6 +29,12 @@ end
 local function resolve_color(value, scheme, fallback)
   if type(value) == "number" then
     return ansi_color(value, scheme) or fallback
+  end
+  if value == "background" then
+    return scheme.background
+  end
+  if value == "foreground" then
+    return scheme.foreground
   end
   return value or fallback
 end
