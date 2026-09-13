@@ -9,6 +9,8 @@ local M = {}
 ---@field active_tab_bg number|string|nil
 ---@field inactive_tab_fg number|string|nil
 ---@field inactive_tab_bg number|string|nil
+---@field tab_hover_fg number|string|nil
+---@field tab_hover_bg number|string|nil
 ---@field icon string|nil
 
 ---properties a rule may override, in no particular order
@@ -18,6 +20,8 @@ M.overridable = {
   "active_tab_bg",
   "inactive_tab_fg",
   "inactive_tab_bg",
+  "tab_hover_fg",
+  "tab_hover_bg",
   "icon",
 }
 

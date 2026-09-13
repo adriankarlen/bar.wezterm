@@ -56,11 +56,118 @@ local function resolve_rule_color(value, palette, fallback)
   return fallback
 end
 
+---how far a derived hover color moves from the color it highlights, and the
+---smallest perceptual distance that move has to cover to count as visible at
+---all. the threshold is the just-noticeable difference for CIE delta E, so it
+---rejects only a move nobody could see rather than a merely subtle one.
+local HIGHLIGHT_SHIFT = 0.4
+local HIGHLIGHT_MIN_DELTA = 2.3
+
+---moves a color away from the background it sits on, in whichever direction
+---gains contrast. a color that cannot be parsed, or that has nothing to move
+---because it is fully transparent, is handed back untouched.
+---@param color string
+---@param background string|nil
+---@return string
+local function shift_from(color, background)
+  local parsed, base = pcall(wez.color.parse, color)
+  if not parsed then
+    return color
+  end
+
+  local _, _, _, alpha = base:hsla()
+  if alpha == 0 then
+    return color
+  end
+
+  local lighter = base:lighten(HIGHLIGHT_SHIFT)
+  local darker = base:darken(HIGHLIGHT_SHIFT)
+
+  local known, back = pcall(wez.color.parse, background)
+  if not known then
+    return tostring(lighter)
+  end
+
+  local pick, other = darker, lighter
+  if lighter:contrast_ratio(back) >= darker:contrast_ratio(back) then
+    pick, other = lighter, darker
+  end
+
+  -- a color already pressed against black or white has no room left to move
+  -- in the direction that gains contrast, so take the other one rather than
+  -- return a shift nobody can see
+  if base:delta_e(pick) < HIGHLIGHT_MIN_DELTA then
+    pick = other
+  end
+
+  return tostring(pick)
+end
+
+---derives the color that highlights `value` while the pointer is over it: the
+---scheme's bright counterpart when the scheme gives it one that differs, and
+---otherwise a shade shifted away from the background. many popular schemes
+---(catppuccin, rose-pine, tokyo night, gruvbox) define most of their brights
+---identically to the normal colors, which is why the second half is needed.
+---@param value string|number|nil
+---@param scheme table
+---@param fallback string
+---@return string
+local function highlight(value, scheme, fallback)
+  local base = resolve_color(value, scheme, fallback)
+
+  if type(value) == "number" and value >= 1 and value <= 8 then
+    local bright = ansi_color(value + 8, scheme)
+    if bright and bright ~= base then
+      return bright
+    end
+  end
+
+  return shift_from(base, scheme.background)
+end
+
+---resolves a hover color: an explicit setting wins, and without one the color
+---is derived from whichever color it covers
+---@param value string|number|nil
+---@param base string|number|nil
+---@param scheme table
+---@param fallback string
+---@return string
+local function resolve_hover_color(value, base, scheme, fallback)
+  if value ~= nil then
+    return resolve_color(value, scheme, fallback)
+  end
+  return highlight(base, scheme, fallback)
+end
+
+---resolves a hovered tab's color from what the matching rules set, falling
+---back to the hover color already resolved into the palette
+---@param value string|number|nil
+---@param base string|number|nil
+---@param palette table
+---@param fallback string
+---@return string
+local function resolve_rule_hover_color(value, base, palette, fallback)
+  if value ~= nil then
+    return resolve_rule_color(value, palette, fallback)
+  end
+  if base ~= nil then
+    return highlight(base, palette, fallback)
+  end
+  return fallback
+end
+
 ---builds tab_bar colors block from a resolved color scheme
 ---@param scheme table
 ---@return table
 local function build_tab_bar_colors(scheme)
   local tabs = options.modules.tabs
+
+  -- the new tab button borrows the generic hover color before falling back to
+  -- one derived from its own base, so a single tab_hover_fg is enough to light
+  -- up everything the pointer can reach
+  local new_tab_hover_fg = tabs.new_tab_hover_fg or tabs.tab_hover_fg
+  local new_tab_hover_bg = tabs.new_tab_hover_bg or tabs.tab_hover_bg
+
   return {
     tab_bar = {
       background = "transparent",
@@ -72,9 +179,20 @@ local function build_tab_bar_colors(scheme)
         bg_color = resolve_color(tabs.inactive_tab_bg, scheme, "transparent"),
         fg_color = resolve_color(tabs.inactive_tab_fg, scheme, "white"),
       },
+      -- wezterm's own default for this block carries an italic, which the
+      -- blocks above leave off; spelling it out keeps a hovered tab styled
+      -- like every other one
+      inactive_tab_hover = {
+        bg_color = resolve_hover_color(tabs.tab_hover_bg, tabs.inactive_tab_bg, scheme, "transparent"),
+        fg_color = resolve_hover_color(tabs.tab_hover_fg, tabs.inactive_tab_fg, scheme, "white"),
+      },
       new_tab = {
         bg_color = resolve_color(tabs.new_tab_bg, scheme, "transparent"),
         fg_color = resolve_color(tabs.new_tab_fg, scheme, "white"),
+      },
+      new_tab_hover = {
+        bg_color = resolve_hover_color(new_tab_hover_bg, tabs.new_tab_bg, scheme, "transparent"),
+        fg_color = resolve_hover_color(new_tab_hover_fg, tabs.new_tab_fg, scheme, "white"),
       },
     },
   }
@@ -189,7 +307,7 @@ M.apply_to_config = function(c, opts)
   c.tab_max_width = options.max_width
 end
 
-wez.on("format-tab-title", function(tab, _, _, conf, _, _)
+wez.on("format-tab-title", function(tab, _, _, conf, hover, _)
   local palette = effective_palette(conf)
 
   local tab_options = type(options.modules) == "table" and options.modules.tabs or nil
@@ -222,6 +340,14 @@ wez.on("format-tab-title", function(tab, _, _, conf, _, _)
   if tab.is_active then
     fg = resolve_rule_color(overrides.active_tab_fg, palette, palette.tab_bar.active_tab.fg_color)
     bg = resolve_rule_color(overrides.active_tab_bg, palette, palette.tab_bar.active_tab.bg_color)
+  elseif hover then
+    -- the palette holds the hover colors, but they reach this tab's own cells
+    -- only through the format items returned below
+    local base = palette.tab_bar.inactive_tab_hover or palette.tab_bar.inactive_tab
+    -- a rule that recolors a tab gets a hover color derived from that color,
+    -- the same way an unset global hover color derives one from its own base
+    fg = resolve_rule_hover_color(overrides.tab_hover_fg, overrides.inactive_tab_fg, palette, base.fg_color)
+    bg = resolve_rule_hover_color(overrides.tab_hover_bg, overrides.inactive_tab_bg, palette, base.bg_color)
   else
     fg = resolve_rule_color(overrides.inactive_tab_fg, palette, palette.tab_bar.inactive_tab.fg_color)
     bg = resolve_rule_color(overrides.inactive_tab_bg, palette, palette.tab_bar.inactive_tab.bg_color)
@@ -405,8 +531,12 @@ wez.on("window-config-reloaded", function(window, _)
     and current.active_tab.fg_color == new_tab_bar.tab_bar.active_tab.fg_color
     and current.inactive_tab
     and current.inactive_tab.fg_color == new_tab_bar.tab_bar.inactive_tab.fg_color
+    and current.inactive_tab_hover
+    and current.inactive_tab_hover.fg_color == new_tab_bar.tab_bar.inactive_tab_hover.fg_color
     and current.new_tab
     and current.new_tab.fg_color == new_tab_bar.tab_bar.new_tab.fg_color
+    and current.new_tab_hover
+    and current.new_tab_hover.fg_color == new_tab_bar.tab_bar.new_tab_hover.fg_color
   then
     return
   end

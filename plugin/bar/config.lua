@@ -18,6 +18,10 @@ local M = {}
 ---@field inactive_tab_bg number|string
 ---@field new_tab_fg number|string
 ---@field new_tab_bg number|string
+---@field tab_hover_fg number|string|nil
+---@field tab_hover_bg number|string|nil
+---@field new_tab_hover_fg number|string|nil
+---@field new_tab_hover_bg number|string|nil
 ---@field rules option.rule[]
 
 ---@class option.module

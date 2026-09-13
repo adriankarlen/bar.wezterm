@@ -101,6 +101,12 @@ local config = {
       inactive_tab_bg = "transparent",
       new_tab_fg = 2,
       new_tab_bg = "transparent",
+      -- Defaults for hovers are calculated dynamically
+      -- based on inactive tab colors.
+      tab_hover_fg = nil,
+      tab_hover_bg = nil,
+      new_tab_hover_fg = nil,
+      new_tab_hover_bg = nil,
       rules = {},
     },
     workspace = {
@@ -198,14 +204,18 @@ bar.apply_to_config(config, {
 
 #### 🖌️ Color table
 
-| Config option       | Default       |
-| ------------------- | ------------- |
-| `active_tab_fg`     | `4`           |
-| `active_tab_bg`     | `transparent` |
-| `inactive_tab_fg`   | `6`           |
-| `inactive_tab_bg`   | `transparent` |
-| `new_tab_fg`        | `2`           |
-| `new_tab_bg`        | `transparent` |
+| Config option      | Default                                         |
+| ------------------ | ----------------------------------------------- |
+| `active_tab_fg`    | `4`                                             |
+| `active_tab_bg`    | `transparent`                                   |
+| `inactive_tab_fg`  | `6`                                             |
+| `inactive_tab_bg`  | `transparent`                                   |
+| `tab_hover_fg`     | derived from `inactive_tab_fg`                  |
+| `tab_hover_bg`     | derived from `inactive_tab_bg` (`transparent`)  |
+| `new_tab_fg`       | `2`                                             |
+| `new_tab_bg`       | `transparent`                                   |
+| `new_tab_hover_fg` | `tab_hover_fg`, else derived from `new_tab_fg`  |
+| `new_tab_hover_bg` | `tab_hover_bg`, else derived from `new_tab_bg`  |
 
 ### 🎯 Dynamic tab customization rules
 
@@ -234,7 +244,9 @@ bar.apply_to_config(config, {
           -- check domain name using a custom predicate
           domain = function(name) return name:find "prod" ~= nil end,
           active_tab_bg = "#eb6f92",
-          inactive_tab_bg = "#eb6f92"
+          inactive_tab_bg = "#eb6f92",
+          -- hover colors can be overridden per rule too
+          tab_hover_bg = "#f5a97f"
         },
         {
           -- check cwd, same syntax as with domain names; paths compare with a
@@ -254,6 +266,13 @@ bar.apply_to_config(config, {
 Rules are evaluated in list order. Each matching rule overrides the properties it
 names. For example, domain `SSH:prod-01` will be matched by two rules from above;
 first will set tab's icon and foreground, second will override foreground only.
+
+A rule may name `active_tab_fg`, `active_tab_bg`, `inactive_tab_fg`,
+`inactive_tab_bg`, `tab_hover_fg`, `tab_hover_bg` and `icon`. Hover colors follow
+the same defaulting as the global ones: a rule that sets `inactive_tab_fg` and no
+`tab_hover_fg` gets a hover color derived from its own color, not from the global
+one. `new_tab_hover_*` is not available here — the new tab button is not a tab, so
+no rule can match it.
 
 ## 📜 License
 
